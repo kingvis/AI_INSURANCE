@@ -1,0 +1,99 @@
+# AI Health Copilot Backend Dependencies
+
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+
+# Data Processing
+pandas==2.1.4
+numpy==1.24.3
+
+# Future LangChain Integration
+langchain==0.0.348
+langchain-openai==0.0.2
+openai==1.6.1
+
+# Database (for future expansion)
+sqlalchemy==2.0.23
+alembic==1.13.1
+psycopg2-binary==2.9.9
+
+# Caching and Session Management
+redis==5.0.1
+python-multipart==0.0.6
+
+# Security and Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+
+# Monitoring and Logging
+prometheus-client==0.19.0
+structlog==23.2.0
+
+# HTTP Client for external APIs
+httpx==0.25.2
+aiohttp==3.9.1
+
+# Data Validation and Serialization
+marshmallow==3.20.1
+jsonschema==4.20.0
+
+# Scientific Computing (for health calculations)
+scipy==1.11.4
+scikit-learn==1.3.2
+
+# Time and Date Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Configuration Management
+pyyaml==6.0.1
+toml==0.10.2
+
+# Testing Dependencies
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+httpx==0.25.2
+
+# Development Tools
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1
+pre-commit==3.6.0
+
+# Health-specific Libraries
+bmi-calculator==1.0.0
+# Note: Some health calculation libraries may need to be added
+
+# Future ML/AI Dependencies (commented out for now)
+# tensorflow==2.15.0
+# torch==2.1.0
+# transformers==4.36.0
+# huggingface-hub==0.19.4
+
+# Visualization (for health reports)
+matplotlib==3.8.2
+seaborn==0.13.0
+plotly==5.17.0
+
+# Excel/CSV Export
+openpyxl==3.1.2
+xlsxwriter==3.1.9
+
+# Email notifications (future feature)
+sendgrid==6.11.0
+jinja2==3.1.2
+
+# Background Tasks
+celery==5.3.4
+flower==2.0.1
+
+# WebSocket support (for real-time features)
+websockets==12.0
+
+# Health Data Standards (future integration)
+# fhir-resources==6.4.0
+# hl7apy==1.3.4 
