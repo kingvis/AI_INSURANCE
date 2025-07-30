@@ -1,568 +1,359 @@
-"""
-FastAPI Server for WishInsured Insurance Recommendations
-Provides REST API endpoints for insurance assessment and recommendations
-"""
+# Enhanced Insurance API with Global Finance Features
+# FastAPI server with multi-country support, financial advice, and savings calculations
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import Dict, List, Optional
 import uvicorn
-import json
 from datetime import datetime
-import logging
 
-from insurance_copilot import (
-    InsuranceRecommendationEngine,
-    HealthProfile,
-    PropertyProfile,
-    FinancialProfile,
-    InsuranceRecommendation,
-    InsuranceType,
-    RiskLevel,
-    Priority
-)
+# Import our enhanced engines
+from insurance_copilot import HealthInsuranceCopilot
+from global_finance_engine import GlobalFinanceEngine
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Initialize FastAPI app
 app = FastAPI(
-    title="WishInsured Insurance API",
-    description="Personalized insurance recommendations based on health, property, and financial profiles",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
+    title="WishInsured Global Finance API",
+    description="Comprehensive insurance and financial planning API with multi-country support",
+    version="2.0.0"
 )
 
-# Configure CORS for frontend integration
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize Insurance Engine
-insurance_engine = InsuranceRecommendationEngine()
+# Initialize engines
+health_copilot = HealthInsuranceCopilot()
+finance_engine = GlobalFinanceEngine()
 
-# Pydantic models for API request/response
-class HealthProfileRequest(BaseModel):
-    """Request model for health profile"""
-    age: int = Field(..., description="Age in years", gt=0, le=120)
-    gender: str = Field(..., description="Gender (male/female/other)")
-    height: float = Field(..., description="Height in centimeters", gt=0, le=250)
-    weight: float = Field(..., description="Weight in kilograms", gt=0, le=500)
-    smoking: bool = Field(default=False, description="Current or former smoker")
-    drinking: bool = Field(default=False, description="Regular alcohol consumption")
-    exercise_frequency: str = Field(
-        default="sometimes", 
-        description="Exercise frequency: never, rarely, sometimes, regularly, daily"
-    )
-    medical_conditions: List[str] = Field(default=[], description="List of medical conditions")
-    family_history: List[str] = Field(default=[], description="Family medical history")
-    medications: List[str] = Field(default=[], description="Current medications")
+# Enhanced Pydantic models
+class GlobalHealthProfile(BaseModel):
+    age: int = Field(..., ge=18, le=100)
+    height: float = Field(..., gt=0)
+    weight: float = Field(..., gt=0)
+    gender: str = Field(..., pattern="^(male|female|other)$")
+    smoking: bool = False
+    drinking: str = Field("never", pattern="^(never|occasionally|regularly|heavy)$")
+    exercise_frequency: str = Field("moderate", pattern="^(never|light|moderate|active|very_active)$")
+    medical_conditions: List[str] = []
+    family_history: List[str] = []
+    country: str = Field(..., pattern="^(US|IN|UK|CA|AU|DE)$")
 
-class PropertyProfileRequest(BaseModel):
-    """Request model for property profile"""
-    property_type: str = Field(..., description="Type of property")
-    property_value: float = Field(..., description="Property value in USD", gt=0)
-    location: str = Field(..., description="Property location (city, state)")
-    year_built: int = Field(..., description="Year property was built", gt=1800)
-    security_features: List[str] = Field(default=[], description="Security features")
-    previous_claims: bool = Field(default=False, description="Previous insurance claims")
-    mortgage: bool = Field(default=False, description="Property has mortgage")
+class GlobalPropertyProfile(BaseModel):
+    property_type: str
+    value: float = Field(..., gt=0)
+    year_built: int
+    security_features: List[str] = []
+    location_risk: str = Field("low", pattern="^(low|medium|high)$")
+    previous_claims: int = Field(0, ge=0)
+    country: str = Field(..., pattern="^(US|IN|UK|CA|AU|DE)$")
 
-class FinancialProfileRequest(BaseModel):
-    """Request model for financial profile"""
-    annual_income: float = Field(..., description="Annual income in USD", gt=0)
-    employment_type: str = Field(..., description="Type of employment")
-    dependents: int = Field(..., description="Number of dependents", ge=0)
-    existing_insurance: List[str] = Field(default=[], description="Existing insurance policies")
-    monthly_expenses: float = Field(..., description="Monthly expenses in USD", gt=0)
-    savings: float = Field(..., description="Current savings in USD", ge=0)
-    investment_risk_tolerance: str = Field(..., description="Risk tolerance: conservative, moderate, aggressive")
+class GlobalFinancialProfile(BaseModel):
+    annual_income: float = Field(..., gt=0)
+    current_savings: float = Field(0, ge=0)
+    dependents: int = Field(0, ge=0)
+    employment_type: str = Field("employed", pattern="^(employed|self_employed|unemployed|retired)$")
+    existing_insurance: List[str] = []
+    risk_tolerance: str = Field("moderate", pattern="^(conservative|moderate|aggressive)$")
+    financial_goals: List[str] = []
+    country: str = Field(..., pattern="^(US|IN|UK|CA|AU|DE)$")
+    emergency_fund: float = Field(0, ge=0)
 
-class ComprehensiveAssessmentRequest(BaseModel):
-    """Request model for comprehensive insurance assessment"""
-    health_profile: HealthProfileRequest
-    property_profile: Optional[PropertyProfileRequest] = None
-    financial_profile: FinancialProfileRequest
+class SavingsCalculationRequest(BaseModel):
+    monthly_amount: float = Field(..., gt=0)
+    years: int = Field(..., ge=1, le=50)
+    country: str = Field(..., pattern="^(US|IN|UK|CA|AU|DE)$")
+    risk_level: str = Field("moderate", pattern="^(conservative|moderate|aggressive)$")
 
-class InsuranceRecommendationResponse(BaseModel):
-    """Response model for insurance recommendation"""
-    insurance_type: str
-    product_name: str
-    annual_premium: float
-    monthly_premium: float
-    coverage_amount: float
-    deductible: float
-    risk_level: str
-    priority: str
-    features: List[str]
-    exclusions: List[str]
-    explanation: str
-
-class AssessmentSummaryResponse(BaseModel):
-    """Response model for assessment summary"""
-    total_annual_premium: float
-    total_monthly_premium: float
-    total_coverage: float
-    critical_recommendations: int
-    required_recommendations: int
-    recommendations: List[InsuranceRecommendationResponse]
-    assessment_date: str
-    user_profile_summary: Dict[str, Any]
-
-class QuickQuoteRequest(BaseModel):
-    """Request model for quick insurance quote"""
-    insurance_type: str = Field(..., description="Type of insurance: health, property, life")
-    age: Optional[int] = None
-    property_value: Optional[float] = None
-    annual_income: Optional[float] = None
-    health_conditions: Optional[List[str]] = []
+class ComprehensiveGlobalAssessment(BaseModel):
+    health_profile: GlobalHealthProfile
+    property_profile: Optional[GlobalPropertyProfile] = None
+    financial_profile: GlobalFinancialProfile
 
 # API Endpoints
 
-@app.get("/", response_model=Dict[str, str])
-async def root():
-    """Root endpoint with API information"""
-    return {
-        "service": "WishInsured Insurance API",
-        "version": "1.0.0",
-        "status": "active",
-        "docs": "/docs",
-        "health_check": "/health",
-        "company": "WishInsured - Your Personalized Insurance Advisor"
-    }
-
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "service": "WishInsured Insurance Engine",
-        "engine_ready": True
-    }
+    """API health check endpoint"""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
-@app.post("/assess-comprehensive", response_model=AssessmentSummaryResponse)
-async def assess_comprehensive(request: ComprehensiveAssessmentRequest):
-    """
-    Comprehensive insurance assessment based on all user profiles
-    
-    This endpoint:
-    - Analyzes health, property, and financial profiles
-    - Generates personalized insurance recommendations
-    - Calculates risk levels and premiums
-    - Provides priority-based recommendations
-    """
+@app.get("/countries")
+async def get_supported_countries():
+    """Get list of supported countries with their details"""
+    countries = {
+        "US": {"name": "United States", "currency": "USD", "symbol": "$"},
+        "IN": {"name": "India", "currency": "INR", "symbol": "₹"},
+        "UK": {"name": "United Kingdom", "currency": "GBP", "symbol": "£"},
+        "CA": {"name": "Canada", "currency": "CAD", "symbol": "C$"},
+        "AU": {"name": "Australia", "currency": "AUD", "symbol": "A$"},
+        "DE": {"name": "Germany", "currency": "EUR", "symbol": "€"}
+    }
+    return {"countries": countries}
+
+@app.post("/assess-global-comprehensive")
+async def assess_global_comprehensive(assessment: ComprehensiveGlobalAssessment):
+    """Comprehensive global insurance and financial assessment"""
     try:
-        logger.info("Received comprehensive insurance assessment request")
+        country = assessment.financial_profile.country
         
-        # Convert request to internal profile objects
-        health_profile = HealthProfile(
-            age=request.health_profile.age,
-            gender=request.health_profile.gender,
-            height=request.health_profile.height,
-            weight=request.health_profile.weight,
-            smoking=request.health_profile.smoking,
-            drinking=request.health_profile.drinking,
-            exercise_frequency=request.health_profile.exercise_frequency,
-            medical_conditions=request.health_profile.medical_conditions,
-            family_history=request.health_profile.family_history,
-            medications=request.health_profile.medications
+        # Health assessment with BMI logic
+        health_data = assessment.health_profile.dict()
+        bmi = health_copilot.calculate_bmi(health_data["height"], health_data["weight"])
+        health_risks = health_copilot.assess_health_risks(health_data)
+        
+        # Generate insurance recommendations with country-specific pricing
+        recommendations = []
+        
+        # Health Insurance
+        base_health_premium = health_copilot.calculate_base_premium(health_data, "health")
+        health_premium = finance_engine.calculate_country_premium(
+            base_health_premium, country, "health"
         )
         
-        financial_profile = FinancialProfile(
-            annual_income=request.financial_profile.annual_income,
-            employment_type=request.financial_profile.employment_type,
-            dependents=request.financial_profile.dependents,
-            existing_insurance=request.financial_profile.existing_insurance,
-            monthly_expenses=request.financial_profile.monthly_expenses,
-            savings=request.financial_profile.savings,
-            investment_risk_tolerance=request.financial_profile.investment_risk_tolerance
-        )
+        recommendations.append({
+            "type": "Health Insurance",
+            "priority": "Critical",
+            "premium": health_premium,
+            "coverage": f"Comprehensive medical coverage with {health_premium['symbol']}{health_premium['amount']*10:,.0f} annual limit",
+            "features": ["Hospitalization", "Outpatient care", "Prescription drugs", "Preventive care"],
+            "reasoning": f"BMI: {bmi['value']:.1f} ({bmi['category']}) - {health_risks['recommendations'][0] if health_risks['recommendations'] else 'Standard health coverage recommended'}"
+        })
         
-        # Handle optional property profile
-        if request.property_profile:
-            property_profile = PropertyProfile(
-                property_type=request.property_profile.property_type,
-                property_value=request.property_profile.property_value,
-                location=request.property_profile.location,
-                year_built=request.property_profile.year_built,
-                security_features=request.property_profile.security_features,
-                previous_claims=request.property_profile.previous_claims,
-                mortgage=request.property_profile.mortgage
+        # Property Insurance (if provided)
+        if assessment.property_profile:
+            property_data = assessment.property_profile.dict()
+            base_property_premium = property_data["value"] * 0.005  # 0.5% of value
+            property_premium = finance_engine.calculate_country_premium(
+                base_property_premium, country, "property"
             )
-        else:
-            # Create empty property profile
-            property_profile = PropertyProfile(
-                property_type="",
-                property_value=0,
-                location="",
-                year_built=2000,
-                security_features=[],
-                previous_claims=False,
-                mortgage=False
-            )
+            
+            recommendations.append({
+                "type": "Property Insurance",
+                "priority": "Required",
+                "premium": property_premium,
+                "coverage": f"Property value up to {property_premium['symbol']}{property_data['value']:,.0f}",
+                "features": ["Fire & theft", "Natural disasters", "Personal liability", "Contents coverage"],
+                "reasoning": f"Property built in {property_data['year_built']}, security features: {len(property_data['security_features'])}"
+            })
         
-        # Generate recommendations
-        recommendations = insurance_engine.generate_comprehensive_recommendations(
-            health_profile, property_profile, financial_profile
+        # Life Insurance
+        financial_data = assessment.financial_profile.dict()
+        life_coverage_needed = financial_data["annual_income"] * 10  # 10x annual income
+        base_life_premium = life_coverage_needed * 0.001  # 0.1% of coverage
+        life_premium = finance_engine.calculate_country_premium(
+            base_life_premium, country, "life"
         )
         
-        # Calculate summary
-        summary = insurance_engine.calculate_total_premium(recommendations)
+        recommendations.append({
+            "type": "Life Insurance",
+            "priority": "Required" if financial_data["dependents"] > 0 else "Recommended",
+            "premium": life_premium,
+            "coverage": f"Life coverage: {life_premium['symbol']}{life_coverage_needed:,.0f}",
+            "features": ["Term life insurance", "Beneficiary protection", "Tax-free benefits"],
+            "reasoning": f"Income replacement for {financial_data['dependents']} dependents" if financial_data["dependents"] > 0 else "Future planning and debt coverage"
+        })
         
-        # Convert to response format
-        recommendation_responses = []
-        for rec in recommendations:
-            recommendation_responses.append(InsuranceRecommendationResponse(
-                insurance_type=rec.insurance_type.value,
-                product_name=rec.product_name,
-                annual_premium=rec.annual_premium,
-                monthly_premium=rec.annual_premium / 12,
-                coverage_amount=rec.coverage_amount,
-                deductible=rec.deductible,
-                risk_level=rec.risk_level.value,
-                priority=rec.priority.value,
-                features=rec.features,
-                exclusions=rec.exclusions,
-                explanation=rec.explanation
-            ))
+        # Generate financial advice
+        financial_advice = finance_engine.generate_financial_advice(financial_data, country)
         
-        # Create user profile summary
-        user_summary = {
-            "age": health_profile.age,
-            "bmi": round(health_profile.bmi, 1),
-            "bmi_category": "Obese" if health_profile.bmi >= 30 else "Overweight" if health_profile.bmi >= 25 else "Normal",
-            "dependents": financial_profile.dependents,
-            "annual_income": financial_profile.annual_income,
-            "property_value": property_profile.property_value if property_profile.property_value > 0 else None,
-            "risk_factors": {
-                "smoking": health_profile.smoking,
-                "medical_conditions": len(health_profile.medical_conditions),
-                "high_bmi": health_profile.bmi >= 30
+        # Get country-specific policies
+        country_policies = finance_engine.get_country_specific_policies(country)
+        
+        # Generate motivational content
+        user_age = assessment.health_profile.age
+        savings_rate = financial_advice["monthly_analysis"]["savings_rate"]
+        motivational_content = finance_engine.get_motivational_content(user_age, savings_rate, country)
+        
+        return {
+            "bmi_assessment": bmi,
+            "health_risks": health_risks,
+            "insurance_recommendations": recommendations,
+            "financial_advice": financial_advice,
+            "country_policies": country_policies,
+            "motivational_content": motivational_content,
+            "assessment_summary": {
+                "total_monthly_premiums": sum(rec["premium"]["monthly"] for rec in recommendations),
+                "currency": recommendations[0]["premium"]["currency"],
+                "symbol": recommendations[0]["premium"]["symbol"],
+                "country": country,
+                "assessment_date": datetime.now().isoformat()
             }
         }
         
-        response = AssessmentSummaryResponse(
-            total_annual_premium=summary['total_annual_premium'],
-            total_monthly_premium=summary['monthly_premium'],
-            total_coverage=summary['total_coverage'],
-            critical_recommendations=summary['critical_recommendations'],
-            required_recommendations=summary['required_recommendations'],
-            recommendations=recommendation_responses,
-            assessment_date=datetime.now().isoformat(),
-            user_profile_summary=user_summary
-        )
-        
-        logger.info(f"Assessment completed. Total premium: ${summary['total_annual_premium']:,.2f}")
-        return response
-        
     except Exception as e:
-        logger.error(f"Error in comprehensive assessment: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Internal server error during assessment: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Assessment failed: {str(e)}")
 
-@app.post("/quick-quote", response_model=Dict[str, Any])
-async def quick_quote(request: QuickQuoteRequest):
-    """
-    Quick insurance quote for specific insurance type
-    """
+@app.post("/calculate-savings-projection")
+async def calculate_savings_projection(request: SavingsCalculationRequest):
+    """Calculate savings and investment projections"""
     try:
-        logger.info(f"Quick quote request for {request.insurance_type}")
+        projections = finance_engine.calculate_savings_projections(
+            request.monthly_amount,
+            request.years,
+            request.country,
+            request.risk_level
+        )
         
-        if request.insurance_type.lower() == "health":
-            if not request.age:
-                raise HTTPException(status_code=400, detail="Age required for health insurance quote")
-            
-            # Create minimal health profile
-            health_profile = HealthProfile(
-                age=request.age,
-                gender="other",
-                height=170,
-                weight=70,
-                smoking=False,
-                drinking=False,
-                exercise_frequency="sometimes",
-                medical_conditions=request.health_conditions or [],
-                family_history=[],
-                medications=[]
-            )
-            
-            financial_profile = FinancialProfile(
-                annual_income=50000,
-                employment_type="full-time",
-                dependents=0,
-                existing_insurance=[],
-                monthly_expenses=3000,
-                savings=10000,
-                investment_risk_tolerance="moderate"
-            )
-            
-            recommendation = insurance_engine.health_calculator.generate_health_recommendation(
-                health_profile, financial_profile
-            )
-            
-            return {
-                "insurance_type": "health",
-                "estimated_annual_premium": recommendation.annual_premium,
-                "estimated_monthly_premium": recommendation.annual_premium / 12,
-                "coverage_amount": recommendation.coverage_amount,
-                "risk_level": recommendation.risk_level.value,
-                "note": "Quote based on basic profile. Complete assessment for accurate pricing."
-            }
+        return {
+            "projections": projections,
+            "request_details": request.dict(),
+            "calculation_date": datetime.now().isoformat()
+        }
         
-        elif request.insurance_type.lower() == "property":
-            if not request.property_value:
-                raise HTTPException(status_code=400, detail="Property value required for property insurance quote")
-            
-            property_profile = PropertyProfile(
-                property_type="single-family",
-                property_value=request.property_value,
-                location="General Location",
-                year_built=2000,
-                security_features=[],
-                previous_claims=False,
-                mortgage=True
-            )
-            
-            financial_profile = FinancialProfile(
-                annual_income=50000,
-                employment_type="full-time",
-                dependents=0,
-                existing_insurance=[],
-                monthly_expenses=3000,
-                savings=10000,
-                investment_risk_tolerance="moderate"
-            )
-            
-            recommendation = insurance_engine.property_calculator.generate_property_recommendation(
-                property_profile, financial_profile
-            )
-            
-            if recommendation:
-                return {
-                    "insurance_type": "property",
-                    "estimated_annual_premium": recommendation.annual_premium,
-                    "estimated_monthly_premium": recommendation.annual_premium / 12,
-                    "coverage_amount": recommendation.coverage_amount,
-                    "risk_level": recommendation.risk_level.value,
-                    "note": "Quote based on basic profile. Complete assessment for accurate pricing."
-                }
-            else:
-                raise HTTPException(status_code=400, detail="Unable to generate property quote")
-        
-        elif request.insurance_type.lower() == "life":
-            if not request.annual_income:
-                raise HTTPException(status_code=400, detail="Annual income required for life insurance quote")
-            
-            health_profile = HealthProfile(
-                age=request.age or 35,
-                gender="other",
-                height=170,
-                weight=70,
-                smoking=False,
-                drinking=False,
-                exercise_frequency="sometimes",
-                medical_conditions=request.health_conditions or [],
-                family_history=[],
-                medications=[]
-            )
-            
-            financial_profile = FinancialProfile(
-                annual_income=request.annual_income,
-                employment_type="full-time",
-                dependents=0,
-                existing_insurance=[],
-                monthly_expenses=request.annual_income * 0.6 / 12,
-                savings=request.annual_income * 0.1,
-                investment_risk_tolerance="moderate"
-            )
-            
-            recommendation = insurance_engine.life_calculator.generate_life_recommendation(
-                health_profile, financial_profile
-            )
-            
-            return {
-                "insurance_type": "life",
-                "estimated_annual_premium": recommendation.annual_premium,
-                "estimated_monthly_premium": recommendation.annual_premium / 12,
-                "coverage_amount": recommendation.coverage_amount,
-                "risk_level": recommendation.risk_level.value,
-                "note": "Quote based on basic profile. Complete assessment for accurate pricing."
-            }
-        
-        else:
-            raise HTTPException(status_code=400, detail="Invalid insurance type. Use: health, property, or life")
-            
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"Error in quick quote: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error generating quote: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Calculation failed: {str(e)}")
+
+@app.get("/financial-advice/{country}")
+async def get_financial_advice(
+    country: str,
+    annual_income: float = Query(..., gt=0),
+    age: int = Query(..., ge=18, le=100),
+    dependents: int = Query(0, ge=0),
+    current_savings: float = Query(0, ge=0),
+         risk_tolerance: str = Query("moderate", pattern="^(conservative|moderate|aggressive)$")
+):
+    """Get country-specific financial advice"""
+    try:
+        user_profile = {
+            "annual_income": annual_income,
+            "age": age,
+            "dependents": dependents,
+            "current_savings": current_savings,
+            "risk_tolerance": risk_tolerance
+        }
+        
+        advice = finance_engine.generate_financial_advice(user_profile, country)
+        
+        return {
+            "financial_advice": advice,
+            "user_profile": user_profile,
+            "country": country
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Advice generation failed: {str(e)}")
+
+@app.get("/country-policies/{country}")
+async def get_country_policies(country: str):
+    """Get country-specific insurance policies and financial products"""
+    try:
+        policies = finance_engine.get_country_specific_policies(country)
+        
+        return {
+            "country": country,
+            "policies": policies
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Policy retrieval failed: {str(e)}")
+
+@app.get("/motivational-content/{country}")
+async def get_motivational_content(
+    country: str,
+    age: int = Query(..., ge=18, le=100),
+    savings_rate: float = Query(..., ge=0, le=100)
+):
+    """Get motivational content for financial independence"""
+    try:
+        content = finance_engine.get_motivational_content(age, savings_rate, country)
+        
+        return {
+            "motivational_content": content,
+            "user_details": {"age": age, "savings_rate": savings_rate, "country": country}
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Content generation failed: {str(e)}")
+
+@app.post("/calculate-bmi-global")
+async def calculate_bmi_global(
+    height: float = Query(..., gt=0),
+    weight: float = Query(..., gt=0),
+         country: str = Query(..., pattern="^(US|IN|UK|CA|AU|DE)$")
+ ):
+     """Calculate BMI with country-specific health recommendations"""
+    try:
+        bmi_data = health_copilot.calculate_bmi(height, weight)
+        
+        # Add country-specific context
+        country_data = finance_engine.countries_data[country]
+        
+        result = {
+            "bmi": bmi_data,
+            "country_context": {
+                "country": country,
+                "currency": country_data["currency"],
+                "symbol": country_data["symbol"],
+                "healthcare_system": country_data["healthcare_system"]
+            }
+        }
+        
+        # Add cardiovascular risk warning for BMI > 30
+        if bmi_data["value"] >= 30:
+            result["cardiovascular_warning"] = {
+                "risk_level": "HIGH",
+                "message": "BMI > 30 indicates obesity, significantly increasing risk of cardiovascular disease, diabetes, and other health complications.",
+                "recommendations": [
+                    "Consult with a healthcare provider immediately",
+                    "Consider a structured weight management program",
+                    "Increase physical activity gradually",
+                    "Adopt a balanced, calorie-controlled diet",
+                    "Monitor blood pressure and blood sugar regularly"
+                ],
+                "insurance_impact": f"Higher health insurance premiums likely in {country}"
+            }
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"BMI calculation failed: {str(e)}")
+
+@app.get("/exchange-rates")
+async def get_exchange_rates():
+    """Get current exchange rates for supported currencies"""
+    return {"exchange_rates": finance_engine.exchange_rates}
+
+@app.get("/investment-returns/{country}")
+async def get_investment_returns(country: str):
+    """Get expected investment returns by country and risk level"""
+    try:
+        returns = finance_engine.investment_returns[country]
+        country_data = finance_engine.countries_data[country]
+        
+        return {
+            "country": country,
+            "currency": country_data["currency"],
+            "symbol": country_data["symbol"],
+            "expected_returns": returns,
+            "investment_options": country_data["investment_options"],
+            "tax_advantages": country_data["tax_advantages"]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Returns data retrieval failed: {str(e)}")
+
+# Legacy endpoints for backward compatibility
+@app.post("/calculate-bmi")
+async def calculate_bmi_legacy(height: float = Query(..., gt=0), weight: float = Query(..., gt=0)):
+    """Legacy BMI calculation endpoint"""
+    return health_copilot.calculate_bmi(height, weight)
 
 @app.get("/insurance-types")
 async def get_insurance_types():
-    """Get available insurance types and their descriptions"""
+    """Get available insurance types"""
     return {
-        "insurance_types": [
-            {
-                "type": "health",
-                "name": "Health Insurance",
-                "description": "Comprehensive medical coverage including hospitalization, medications, and preventive care"
-            },
-            {
-                "type": "life",
-                "name": "Life Insurance",
-                "description": "Financial protection for your family in case of unexpected death"
-            },
-            {
-                "type": "property",
-                "name": "Property Insurance",
-                "description": "Protection for your home and belongings against damage, theft, and natural disasters"
-            },
-            {
-                "type": "auto",
-                "name": "Auto Insurance",
-                "description": "Vehicle protection including liability, collision, and comprehensive coverage"
-            },
-            {
-                "type": "disability",
-                "name": "Disability Insurance",
-                "description": "Income protection if you become unable to work due to illness or injury"
-            }
-        ],
-        "coming_soon": ["travel", "business", "cyber", "umbrella"]
-    }
-
-@app.get("/risk-factors")
-async def get_risk_factors():
-    """Get information about risk factors that affect insurance premiums"""
-    return {
-        "health_risk_factors": [
-            {"factor": "Age", "impact": "Higher age increases premiums"},
-            {"factor": "BMI", "impact": "BMI over 30 significantly increases health insurance costs"},
-            {"factor": "Smoking", "impact": "Can increase premiums by 200-300%"},
-            {"factor": "Medical conditions", "impact": "Chronic conditions increase risk assessment"},
-            {"factor": "Family history", "impact": "Genetic predispositions affect long-term risk"}
-        ],
-        "property_risk_factors": [
-            {"factor": "Property age", "impact": "Older properties (pre-1980) have higher premiums"},
-            {"factor": "Location", "impact": "High-risk areas (coastal, earthquake zones) cost more"},
-            {"factor": "Security features", "impact": "Security systems can reduce premiums"},
-            {"factor": "Previous claims", "impact": "Claims history affects future rates"},
-            {"factor": "Construction type", "impact": "Fire-resistant materials reduce costs"}
-        ],
-        "financial_risk_factors": [
-            {"factor": "Income stability", "impact": "Stable employment reduces risk"},
-            {"factor": "Debt-to-income ratio", "impact": "High debt increases life insurance needs"},
-            {"factor": "Dependents", "impact": "More dependents increase coverage requirements"},
-            {"factor": "Existing coverage", "impact": "Current insurance affects new policy needs"}
+        "types": [
+            {"id": "health", "name": "Health Insurance", "description": "Medical coverage and healthcare costs"},
+            {"id": "property", "name": "Property Insurance", "description": "Home and property protection"},
+            {"id": "life", "name": "Life Insurance", "description": "Life coverage and beneficiary protection"},
+            {"id": "auto", "name": "Auto Insurance", "description": "Vehicle coverage and liability"}
         ]
     }
 
-@app.post("/calculate-bmi")
-async def calculate_bmi(height: float, weight: float):
-    """Calculate BMI and health risk category"""
-    try:
-        if height <= 0 or weight <= 0:
-            raise HTTPException(status_code=400, detail="Height and weight must be positive values")
-        
-        bmi = weight / ((height / 100) ** 2)
-        
-        if bmi < 18.5:
-            category = "Underweight"
-            health_risk = "May indicate malnutrition or other health issues"
-            insurance_impact = "May require additional health screening"
-        elif 18.5 <= bmi < 25:
-            category = "Normal weight"
-            health_risk = "Low health risk"
-            insurance_impact = "Qualifies for standard rates"
-        elif 25 <= bmi < 30:
-            category = "Overweight"
-            health_risk = "Increased risk of cardiovascular disease"
-            insurance_impact = "May result in slightly higher premiums"
-        else:
-            category = "Obese"
-            health_risk = "HIGH RISK: Significantly increased risk of diabetes, heart disease, and other complications"
-            insurance_impact = "Will significantly increase health and life insurance premiums"
-        
-        return {
-            "bmi": round(bmi, 1),
-            "category": category,
-            "health_risk": health_risk,
-            "insurance_impact": insurance_impact,
-            "recommendation": "Complete full health assessment for personalized insurance recommendations",
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Error calculating BMI: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error calculating BMI: {str(e)}")
-
-# Background task for logging assessments
-async def log_assessment(user_data: Dict[str, Any], recommendations: List[Dict[str, Any]]):
-    """Background task to log assessments for analytics"""
-    try:
-        log_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "user_profile": user_data,
-            "recommendations": recommendations,
-            "service": "WishInsured"
-        }
-        
-        # In production, this would save to a database
-        with open(f"logs/insurance_assessment_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json", "w") as f:
-            json.dump(log_entry, f, indent=2)
-            
-    except Exception as e:
-        logger.error(f"Error logging assessment: {str(e)}")
-
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request, exc):
-    """Custom HTTP exception handler"""
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "error": f"HTTP {exc.status_code}",
-            "message": str(exc.detail),
-            "timestamp": datetime.now().isoformat(),
-            "service": "WishInsured Insurance API"
-        }
-    )
-
-@app.exception_handler(Exception)
-async def general_exception_handler(request, exc):
-    """General exception handler"""
-    logger.error(f"Unhandled exception: {str(exc)}")
-    return JSONResponse(
-        status_code=500,
-        content={
-            "error": "Internal Server Error",
-            "message": "An unexpected error occurred",
-            "timestamp": datetime.now().isoformat(),
-            "service": "WishInsured Insurance API"
-        }
-    )
-
 if __name__ == "__main__":
-    # Create logs directory
-    import os
-    os.makedirs("logs", exist_ok=True)
-    
-    # Run the server
-    uvicorn.run(
-        "insurance_api:app",
-        host="0.0.0.0",
-        port=8001,  # Different port from health copilot
-        reload=True,
-        log_level="info"
-    ) 
+    uvicorn.run(app, host="0.0.0.0", port=8001) 
