@@ -53,7 +53,7 @@ export function SavingsCalculator({
   isOpen,
   onClose
 }: SavingsCalculatorProps) {
-  // Currency context integration  
+  // Currency context integration
   const { homeCountry, homeCurrency, formatHomeAmount, refreshRates } = useCurrency();
   const { format, symbol } = useCurrencyConverter();
   
@@ -460,31 +460,31 @@ export function SavingsCalculator({
                     </div>
 
                     <div>
-                                            <label className="block text-sm font-medium text-black mb-2">
+                      <label className="block text-sm font-medium text-black mb-2">
                         Monthly Income
                       </label>
-                      <input
-                        type="number"
-                        value={personalProfile.monthlyIncome}
-                        onChange={(e) => setPersonalProfile({...personalProfile, monthlyIncome: parseInt(e.target.value) || 0})}
+                        <input
+                          type="number"
+                          value={personalProfile.monthlyIncome}
+                          onChange={(e) => setPersonalProfile({...personalProfile, monthlyIncome: parseInt(e.target.value) || 0})}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white placeholder:text-gray-400"
-                        placeholder="Enter monthly income"
-                        min="0"
-                      />
+                          placeholder="Enter monthly income"
+                          min="0"
+                        />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-black mb-2">
                         Current Savings
                       </label>
-                      <input
-                        type="number"
-                        value={personalProfile.currentSavings}
-                        onChange={(e) => setPersonalProfile({...personalProfile, currentSavings: parseInt(e.target.value) || 0})}
+                        <input
+                          type="number"
+                          value={personalProfile.currentSavings}
+                          onChange={(e) => setPersonalProfile({...personalProfile, currentSavings: parseInt(e.target.value) || 0})}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white placeholder:text-gray-400"
-                        placeholder="How much do you have saved?"
-                        min="0"
-                      />
+                          placeholder="How much do you have saved?"
+                          min="0"
+                        />
                     </div>
                   </div>
 
@@ -500,18 +500,18 @@ export function SavingsCalculator({
                           .map((goal, goalIndex) => {
                             const safeKey = goal.id || `goal-${goalIndex}-${goal.label?.replace(/[^a-zA-Z0-9]/g, '') || 'unknown'}`;
                             return (
-                              <button
+                          <button
                                 key={`savings-goal-${safeKey}`}
-                                onClick={() => setPersonalProfile({...personalProfile, primaryGoal: goal.id})}
-                                className={`p-3 text-left border rounded-lg transition-all ${
-                                  personalProfile.primaryGoal === goal.id
+                            onClick={() => setPersonalProfile({...personalProfile, primaryGoal: goal.id})}
+                            className={`p-3 text-left border rounded-lg transition-all ${
+                              personalProfile.primaryGoal === goal.id
                                     ? 'border-green-500 bg-green-50 text-green-800'
                                     : 'border-gray-200 hover:border-green-300 text-black'
-                                }`}
-                              >
+                            }`}
+                          >
                                 <div className="font-medium text-sm text-black">{goal.label}</div>
                                 <div className="text-xs text-gray-700">{goal.description}</div>
-                              </button>
+                          </button>
                             );
                           })}
                       </div>
@@ -527,18 +527,18 @@ export function SavingsCalculator({
                           .map((motivation, motivationIndex) => {
                             const safeKey = motivation.id || `motivation-${motivationIndex}-${motivation.label?.replace(/[^a-zA-Z0-9]/g, '') || 'unknown'}`;
                             return (
-                              <button
+                          <button
                                 key={`motivation-type-${safeKey}`}
-                                onClick={() => setPersonalProfile({...personalProfile, motivation: motivation.id})}
-                                className={`w-full p-3 text-left border rounded-lg transition-all ${
-                                  personalProfile.motivation === motivation.id
+                            onClick={() => setPersonalProfile({...personalProfile, motivation: motivation.id})}
+                            className={`w-full p-3 text-left border rounded-lg transition-all ${
+                              personalProfile.motivation === motivation.id
                                     ? 'border-blue-500 bg-blue-50 text-blue-800'
                                     : 'border-gray-200 hover:border-blue-300 text-black'
-                                }`}
-                              >
-                                <div className="font-medium">{motivation.label}</div>
+                            }`}
+                          >
+                            <div className="font-medium">{motivation.label}</div>
                                 <div className="text-sm text-gray-700">{motivation.description}</div>
-                              </button>
+                          </button>
                             );
                           })}
                       </div>
@@ -556,18 +556,18 @@ export function SavingsCalculator({
                       .map((lifestyle, lifestyleIndex) => {
                         const safeKey = lifestyle.id || `lifestyle-${lifestyleIndex}-${lifestyle.label?.replace(/[^a-zA-Z0-9]/g, '') || 'unknown'}`;
                         return (
-                          <button
+                      <button
                             key={`lifestyle-type-${safeKey}`}
-                            onClick={() => setPersonalProfile({...personalProfile, lifestyle: lifestyle.id})}
+                        onClick={() => setPersonalProfile({...personalProfile, lifestyle: lifestyle.id})}
                             className={`p-3 text-left border rounded-lg transition-all ${
-                              personalProfile.lifestyle === lifestyle.id
+                          personalProfile.lifestyle === lifestyle.id
                                 ? 'border-purple-500 bg-purple-50 text-purple-800'
                                 : 'border-gray-200 hover:border-purple-300 text-black'
-                            }`}
-                          >
+                        }`}
+                      >
                             <div className="font-medium text-sm text-black">{lifestyle.label}</div>
                             <div className="text-xs text-gray-700">{lifestyle.description}</div>
-                          </button>
+                      </button>
                         );
                       })}
                   </div>
@@ -1005,7 +1005,7 @@ export function SavingsCalculator({
                     <h3 className="text-2xl font-bold text-black mb-2">💎 Handpicked for You</h3>
                     <p className="text-black">
                                               Based on your {personalProfile.age}-year-old profile, {personalProfile.lifestyle} lifestyle, and {formatAmount(personalProfile.monthlyIncome)} monthly income
-                    </p>
+                  </p>
                                           {homeCurrency && homeCountry !== 'usa' && homeCurrency.code !== 'USD' && (
                       <div className="mt-2 flex flex-col gap-1">
                         <div className="text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-flex items-center gap-1">

@@ -30,14 +30,28 @@ export function CountryFlag({
   const flagUrl = getCountryFlag(countryCode);
   
   if (error) {
-    // Fallback emoji if image fails to load
+    // Fallback emoji if image fails to load with specific country flags
+    const countryEmojis: Record<string, string> = {
+      'US': '🇺🇸',
+      'IN': '🇮🇳', 
+      'UK': '🇬🇧',
+      'CA': '🇨🇦',
+      'AU': '🇦🇺',
+      'DE': '🇩🇪'
+    };
+    
     return (
       <span 
-        className={`inline-flex items-center justify-center text-xs bg-gray-100 rounded ${className}`}
-        style={{ width: `${width}px`, height: `${height}px` }}
+        className={`inline-flex items-center justify-center bg-gray-100 rounded ${className}`}
+        style={{ 
+          width: `${width}px`, 
+          height: `${height}px`,
+          fontSize: `${Math.min(width * 0.7, height * 0.7)}px`,
+          fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "EmojiOne Color", "Android Emoji", sans-serif'
+        }}
         title={countryName || countryCode}
       >
-        🏳️
+        {countryEmojis[countryCode] || '🏳️'}
       </span>
     );
   }
@@ -54,8 +68,12 @@ export function CountryFlag({
         minWidth: `${width}px`,
         minHeight: `${height}px`
       }}
-      onLoad={() => setLoading(false)}
-      onError={() => {
+      onLoad={() => {
+        console.log(`✅ Flag loaded successfully for ${countryCode}: ${flagUrl}`);
+        setLoading(false);
+      }}
+      onError={(e) => {
+        console.error(`❌ Flag failed to load for ${countryCode}: ${flagUrl}`, e);
         setError(true);
         setLoading(false);
       }}

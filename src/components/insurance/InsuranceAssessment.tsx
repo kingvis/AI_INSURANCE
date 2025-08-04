@@ -8,7 +8,7 @@ import { AIAnalysisReport } from '@/components/AIAnalysisReport';
 import { useCurrency, useCurrencyConverter } from '@/contexts/CurrencyContext';
 import { 
   Heart, Home, DollarSign, ChevronRight, ChevronLeft, 
-  User, Activity, Shield, Calculator
+  User, Activity, Shield, Calculator, RotateCcw
 } from 'lucide-react';
 import {
   type GlobalHealthProfile,
@@ -92,6 +92,87 @@ export function InsuranceAssessment({
   // AI Report display
   const [showAIReport, setShowAIReport] = useState(false);
   const [aiAnalysisData, setAiAnalysisData] = useState<any>(null);
+
+  // Retake assessment function
+  const handleRetakeAssessment = () => {
+    // Reset all form data to initial state
+    setCurrentStep(1);
+    setIsLoading(false);
+    
+    // Reset health data
+    setHealthData({
+      age: 30,
+      height: 170,
+      weight: 70,
+      gender: "male",
+      smoking: false,
+      drinking: "never",
+      exercise_frequency: "moderate",
+      medical_conditions: [],
+      family_history: [],
+      country: homeCountry
+    });
+
+    // Reset personal info
+    setPersonalInfo({
+      firstName: "",
+      lastName: "",
+      occupation: "",
+      maritalStatus: "",
+      hasChildren: false,
+      numChildren: 0,
+      lifestyle: "active",
+      stressLevel: "moderate",
+      sleepHours: 7,
+      hasRegularCheckups: true,
+      lastCheckupYear: new Date().getFullYear(),
+      chronicConditions: [],
+      medications: [],
+      allergies: [],
+      familyHistoryDetails: []
+    });
+
+    // Reset property data
+    setPropertyData({
+      property_type: "single-family",
+      value: 300000,
+      year_built: 2010,
+      security_features: [],
+      location_risk: "low",
+      previous_claims: 0,
+      country: homeCountry
+    });
+
+    // Reset financial data
+    setFinancialData({
+      annual_income: 75000,
+      current_savings: 15000,
+      dependents: 0,
+      employment_type: "employed",
+      existing_insurance: [],
+      risk_tolerance: "moderate",
+      financial_goals: [],
+      country: homeCountry,
+      emergency_fund: 5000
+    });
+
+    // Reset progress tracking
+    setStepProgress({
+      step1: 0,
+      step2: 0,
+      step3: 0
+    });
+
+    // Reset auto-save states
+    setLastSaved(null);
+    setIsSaving(false);
+
+    // Close AI report and keep the assessment modal open for retaking
+    setShowAIReport(false);
+    setAiAnalysisData(null);
+    
+    console.log('🔄 Assessment reset for retake');
+  };
 
   const [propertyData, setPropertyData] = useState<GlobalPropertyProfile>({
     property_type: "single-family",
@@ -1134,15 +1215,27 @@ Version: 1.0
 
         {/* Footer */}
         <div className="bg-gray-50 px-6 py-4 flex justify-between items-center">
-          <Button
-            onClick={handlePrevious}
-            variant="outline"
-            disabled={currentStep === 1}
-            className="flex items-center gap-2"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Previous
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={handlePrevious}
+              variant="outline"
+              disabled={currentStep === 1}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous
+            </Button>
+            
+            <Button
+              onClick={handleRetakeAssessment}
+              variant="outline"
+              className="flex items-center gap-2 border-orange-500 text-orange-600 hover:bg-orange-50"
+              title="Start over with a fresh assessment"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Retake Assessment
+            </Button>
+          </div>
           
           <div className="flex flex-col items-center gap-2">
             <div className="text-sm text-gray-500">
@@ -1215,6 +1308,7 @@ Version: 1.0
         setAiAnalysisData(null);
         onClose(); // Close the main assessment modal as well
       }}
+      onRetake={handleRetakeAssessment}
       analysisData={aiAnalysisData}
     />
     </div>
@@ -1252,7 +1346,7 @@ function HealthProfileStep({
             <Heart className="w-6 h-6 text-red-600" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-black">Let's Get Personal! 👋</h3>
+            <h3 className="text-2xl font-bold text-gray-900">Let's Get Personal! 👋</h3>
             <p className="text-gray-600">Tell us about yourself so we can create the perfect insurance plan for you</p>
           </div>
         </div>
@@ -1260,26 +1354,26 @@ function HealthProfileStep({
         {/* Personal Introduction */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               👤 First Name
             </label>
             <input
               type="text"
               value={personalInfo.firstName}
               onChange={(e) => onPersonalInfoChange({...personalInfo, firstName: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 bg-white font-medium"
               placeholder="What should we call you?"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               📝 Last Name
             </label>
             <input
               type="text"
               value={personalInfo.lastName}
               onChange={(e) => onPersonalInfoChange({...personalInfo, lastName: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 bg-white font-medium"
               placeholder="Your family name"
             />
           </div>
@@ -1296,17 +1390,17 @@ function HealthProfileStep({
 
       {/* Basic Health Information */}
       <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
-        <h4 className="text-lg font-semibold text-black mb-4">📊 Basic Health Stats</h4>
+        <h4 className="text-xl font-bold text-gray-900 mb-4">📊 Basic Health Stats</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🎂 Age
             </label>
             <input
               type="number"
               value={data.age}
               onChange={(e) => onChange({...data, age: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white font-medium"
               placeholder="How old are you?"
               min="18"
               max="100"
@@ -1321,13 +1415,13 @@ function HealthProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               ⚧️ Gender
             </label>
             <select
               value={data.gender}
               onChange={(e) => onChange({...data, gender: e.target.value as any})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white font-medium"
             >
               <option value="">Select your gender</option>
               <option value="male">Male</option>
@@ -1337,14 +1431,14 @@ function HealthProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               📏 Height (cm)
             </label>
             <input
               type="number"
               value={data.height}
               onChange={(e) => onChange({...data, height: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white font-medium"
               placeholder="Your height in cm"
               min="100"
               max="250"
@@ -1352,14 +1446,14 @@ function HealthProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               ⚖️ Weight (kg)
             </label>
             <input
               type="number"
               value={data.weight}
               onChange={(e) => onChange({...data, weight: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white font-medium"
               placeholder="Your current weight"
               min="30"
               max="300"
@@ -1376,10 +1470,10 @@ function HealthProfileStep({
 
       {/* Lifestyle Questions */}
       <div className="bg-green-50 p-6 rounded-xl border border-green-100">
-        <h4 className="text-lg font-semibold text-black mb-4">🌱 Lifestyle & Habits</h4>
+        <h4 className="text-xl font-bold text-gray-900 mb-4">🌱 Lifestyle & Habits</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-black mb-3">
+            <label className="block text-base font-semibold text-gray-900 mb-3">
               🚬 Do you smoke?
             </label>
             <div className="flex gap-4">
@@ -1390,7 +1484,7 @@ function HealthProfileStep({
                   onChange={() => onChange({...data, smoking: false})}
                   className="mr-2 text-green-600"
                 />
-                <span className="flex items-center gap-2 text-black">
+                <span className="flex items-center gap-2 text-gray-900">
                   ✅ No, I don't smoke
                 </span>
               </label>
@@ -1401,7 +1495,7 @@ function HealthProfileStep({
                   onChange={() => onChange({...data, smoking: true})}
                   className="mr-2 text-red-600"
                 />
-                <span className="flex items-center gap-2 text-black">
+                <span className="flex items-center gap-2 text-gray-900">
                   🚬 Yes, I smoke
                 </span>
               </label>
@@ -1409,13 +1503,13 @@ function HealthProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🏃‍♀️ Exercise Frequency
             </label>
             <select
               value={data.exercise_frequency}
               onChange={(e) => onChange({...data, exercise_frequency: e.target.value as any})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
             >
               <option value="">How often do you exercise?</option>
               <option value="daily">🏃‍♂️ Daily - I'm very active!</option>
@@ -1427,26 +1521,26 @@ function HealthProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               💼 Occupation
             </label>
             <input
               type="text"
               value={personalInfo.occupation}
               onChange={(e) => onPersonalInfoChange({...personalInfo, occupation: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
               placeholder="What do you do for work?"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               😴 Sleep Hours (per night)
             </label>
             <select
               value={personalInfo.sleepHours}
               onChange={(e) => onPersonalInfoChange({...personalInfo, sleepHours: parseInt(e.target.value)})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
             >
               <option value={4}>4 hours or less</option>
               <option value={5}>5 hours</option>
@@ -1462,7 +1556,7 @@ function HealthProfileStep({
       {/* Quick Continue Option */}
       <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-100">
         <div className="mb-4">
-          <h4 className="text-lg font-semibold text-black mb-2">🚀 Ready to Continue?</h4>
+          <h4 className="text-xl font-bold text-gray-900 mb-2">🚀 Ready to Continue?</h4>
           <p className="text-purple-700 text-sm mb-2">
             ⚡ <strong>Great start!</strong> You can continue with these details or add more health information below for potentially better rates.
           </p>
@@ -1500,7 +1594,7 @@ function HealthProfileStep({
         >
           <div className="flex items-center gap-2">
             <span className="text-orange-600">🩺</span>
-            <span className="font-medium text-black">
+            <span className="font-medium text-gray-900">
               Optional: Detailed Health Information (for better rates)
             </span>
           </div>
@@ -1510,11 +1604,11 @@ function HealthProfileStep({
         {showAdvanced && (
           <div className="p-6 bg-orange-25 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label className="block text-base font-semibold text-gray-900 mb-2">
                 🏥 Do you have regular health checkups?
               </label>
               <div className="flex gap-4">
-                <label className="flex items-center text-black">
+                <label className="flex items-center text-gray-900">
                   <input
                     type="radio"
                     checked={personalInfo.hasRegularCheckups === true}
@@ -1523,7 +1617,7 @@ function HealthProfileStep({
                   />
                   Yes, annually
                 </label>
-                <label className="flex items-center text-black">
+                <label className="flex items-center text-gray-900">
                   <input
                     type="radio"
                     checked={personalInfo.hasRegularCheckups === false}
@@ -1536,13 +1630,13 @@ function HealthProfileStep({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label className="block text-base font-semibold text-gray-900 mb-2">
                 📊 Stress Level
               </label>
               <select
                 value={personalInfo.stressLevel}
                 onChange={(e) => onPersonalInfoChange({...personalInfo, stressLevel: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-black bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 bg-white font-medium"
               >
                 <option value="low">😌 Low stress - Life is good!</option>
                 <option value="moderate">😐 Moderate - Normal work stress</option>
@@ -1551,7 +1645,7 @@ function HealthProfileStep({
             </div>
 
                          <div>
-               <label className="block text-sm font-medium text-black mb-2">
+               <label className="block text-base font-semibold text-gray-900 mb-2">
                  💊 Any chronic conditions or medications?
                </label>
                <textarea
@@ -1560,7 +1654,7 @@ function HealthProfileStep({
                    ...personalInfo, 
                    medications: e.target.value.split(',').map(s => s.trim()).filter(s => s)
                  })}
-                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-black bg-white"
+                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 bg-white font-medium"
                  placeholder="List any conditions or medications (optional)"
                  rows={2}
                />
@@ -1686,7 +1780,7 @@ function PropertyDetailsStep({
             <Home className="w-6 h-6 text-green-600" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-black">Protect Your Property! 🏠</h3>
+            <h3 className="text-2xl font-bold text-gray-900">Protect Your Property! 🏠</h3>
             <p className="text-gray-600">Help us understand your property to find the best protection and rates</p>
           </div>
         </div>
@@ -1694,16 +1788,16 @@ function PropertyDetailsStep({
 
       {/* Basic Property Information */}
       <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
-        <h4 className="text-lg font-semibold text-black mb-4">🏗️ Basic Property Information</h4>
+        <h4 className="text-xl font-bold text-gray-900 mb-4">🏗️ Basic Property Information</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🏠 Property Type
             </label>
             <select
               value={data.property_type}
               onChange={(e) => onChange({...data, property_type: e.target.value as any})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white font-medium"
             >
               <option value="">What type of property do you have?</option>
               <option value="apartment">🏢 Apartment</option>
@@ -1715,14 +1809,14 @@ function PropertyDetailsStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               💰 Property Value ({country?.symbol})
             </label>
             <input
               type="number"
               value={data.value}
               onChange={(e) => onChange({...data, value: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white font-medium"
               placeholder="Current market value"
               min="0"
             />
@@ -1736,14 +1830,14 @@ function PropertyDetailsStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               📅 Year Built
             </label>
             <input
               type="number"
               value={data.year_built}
               onChange={(e) => onChange({...data, year_built: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white font-medium"
               placeholder="When was it built?"
               min="1800"
               max={new Date().getFullYear()}
@@ -1758,13 +1852,13 @@ function PropertyDetailsStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               📍 Location Risk Level
             </label>
             <select
               value={data.location_risk}
               onChange={(e) => onChange({...data, location_risk: e.target.value as any})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white font-medium"
             >
               <option value="">How safe is your neighborhood?</option>
               <option value="low">🟢 Low Risk - Safe, quiet area</option>
@@ -1777,16 +1871,16 @@ function PropertyDetailsStep({
 
              {/* Claims History */}
        <div className="bg-yellow-50 p-6 rounded-xl border border-yellow-100">
-         <h4 className="text-lg font-semibold text-black mb-4">📋 Claims History</h4>
+         <h4 className="text-xl font-bold text-gray-900 mb-4">📋 Claims History</h4>
          <div>
-           <label className="block text-sm font-medium text-black mb-2">
+           <label className="block text-base font-semibold text-gray-900 mb-2">
              📊 Previous Claims (last 5 years)
            </label>
            <input
              type="number"
              value={data.previous_claims}
              onChange={(e) => onChange({...data, previous_claims: parseInt(e.target.value) || 0})}
-             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-black bg-white"
+             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-900 bg-white font-medium"
              placeholder="How many insurance claims have you filed?"
              min="0"
              max="20"
@@ -1856,7 +1950,7 @@ function PropertyDetailsStep({
         >
           <div className="flex items-center gap-2">
             <span className="text-green-600">🛡️</span>
-            <span className="font-medium text-black">
+            <span className="font-medium text-gray-900">
               Property Safety Assessment (Recommended for Better Rates)
             </span>
           </div>
@@ -1872,11 +1966,11 @@ function PropertyDetailsStep({
               </h5>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-black mb-2">
+                  <label className="block text-base font-semibold text-gray-900 mb-2">
                     Do you have a security system?
                   </label>
                   <div className="flex gap-3">
-                    <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 text-black">
+                    <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 text-gray-900">
                       <input
                         type="radio"
                         value="yes"
@@ -1886,7 +1980,7 @@ function PropertyDetailsStep({
                       />
                       ✅ Yes, I have security
                     </label>
-                    <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 text-black">
+                    <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 text-gray-900">
                       <input
                         type="radio"
                         value="no"
@@ -1901,7 +1995,7 @@ function PropertyDetailsStep({
 
                 {safetyData.hasSecuritySystem === 'yes' && (
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">
+                    <label className="block text-base font-semibold text-gray-900 mb-2">
                       Which security features do you have? (Check all that apply)
                     </label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1919,7 +2013,7 @@ function PropertyDetailsStep({
                             }}
                             className="mr-2"
                           />
-                          <span className="text-sm text-black">{option}</span>
+                          <span className="text-base text-gray-800">{option}</span>
                         </label>
                       ))}
                     </div>
@@ -1930,11 +2024,11 @@ function PropertyDetailsStep({
 
             {/* Fire Protection */}
             <div>
-              <h5 className="font-semibold text-black mb-3 flex items-center gap-2 text-black">
+              <h5 className="font-semibold text-black mb-3 flex items-center gap-2 text-gray-900">
                 🔥 Fire Protection & Safety
               </h5>
               <div>
-                <label className="block text-sm font-medium text-black mb-2 text-black">
+                <label className="block text-base font-semibold text-gray-900 mb-2 text-gray-900">
                   Fire protection features in your property:
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1952,7 +2046,7 @@ function PropertyDetailsStep({
                         }}
                         className="mr-2"
                       />
-                      <span className="text-sm text-black">{option}</span>
+                      <span className="text-base text-gray-800">{option}</span>
                     </label>
                   ))}
                 </div>
@@ -1960,17 +2054,17 @@ function PropertyDetailsStep({
             </div>
 
             {/* Natural Disaster Understanding */}
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h5 className="font-semibold text-black mb-3">🌪️ Natural Disaster Awareness</h5>
-              <div className="space-y-4">
+            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+              <h5 className="font-bold text-gray-900 mb-4 text-lg">🌪️ Natural Disaster Awareness</h5>
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-black mb-2">
+                  <label className="block text-base font-semibold text-gray-800 mb-3">
                     Are you in a flood-prone area?
                   </label>
                   <select
                     value={safetyData.hasFloodRisk}
                     onChange={(e) => setSafetyData({...safetyData, hasFloodRisk: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                   >
                     <option value="">Select flood risk level</option>
                     <option value="none">🟢 No flood risk</option>
@@ -1981,13 +2075,13 @@ function PropertyDetailsStep({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-black mb-2">
+                  <label className="block text-base font-semibold text-gray-800 mb-3">
                     Earthquake risk in your area?
                   </label>
                   <select
                     value={safetyData.earthquakeRisk}
                     onChange={(e) => setSafetyData({...safetyData, earthquakeRisk: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                   >
                     <option value="">How earthquake-prone is your area?</option>
                     <option value="none">🟢 No earthquake activity</option>
@@ -2010,17 +2104,17 @@ function PropertyDetailsStep({
                     onChange={(e) => setSafetyData({...safetyData, understandsRisks: e.target.checked})}
                     className="mr-3"
                   />
-                  <span className="text-sm text-black">
+                  <span className="text-base text-gray-800">
                     ✅ I understand the risks associated with my property and location, and I'm committed to maintaining proper safety measures.
                   </span>
                 </label>
 
                 <div>
-                  <label className="block text-sm font-medium text-black mb-2">
+                  <label className="block text-base font-semibold text-gray-900 mb-2">
                     Are you willing to make safety upgrades for better rates?
                   </label>
                   <div className="flex gap-3">
-                    <label className="flex items-center text-black">
+                    <label className="flex items-center text-gray-900">
                       <input
                         type="radio"
                         value="yes"
@@ -2030,7 +2124,7 @@ function PropertyDetailsStep({
                       />
                       💡 Yes, interested in upgrades
                     </label>
-                    <label className="flex items-center text-black">
+                    <label className="flex items-center text-gray-900">
                       <input
                         type="radio"
                         value="maybe"
@@ -2040,7 +2134,7 @@ function PropertyDetailsStep({
                       />
                       🤔 Maybe, depends on cost
                     </label>
-                    <label className="flex items-center text-black">
+                    <label className="flex items-center text-gray-900">
                       <input
                         type="radio"
                         value="no"
@@ -2232,7 +2326,7 @@ function FinancialProfileStep({
             <DollarSign className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-black">Complete Financial Analysis 💰</h3>
+            <h3 className="text-2xl font-bold text-gray-900">Complete Financial Analysis 💰</h3>
             <p className="text-gray-600">Help our AI create your personalized financial roadmap and insurance recommendations</p>
           </div>
         </div>
@@ -2240,17 +2334,17 @@ function FinancialProfileStep({
 
       {/* Basic Financial Information */}
       <div className="bg-green-50 p-6 rounded-xl border border-green-100">
-        <h4 className="text-lg font-semibold text-black mb-4">📊 Financial Overview</h4>
+        <h4 className="text-xl font-bold text-gray-900 mb-4">📊 Financial Overview</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               💵 Annual Income ({country?.symbol})
             </label>
             <input
               type="number"
               value={data.annual_income}
               onChange={(e) => onChange({...data, annual_income: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
               placeholder="Your yearly income"
               min="0"
             />
@@ -2264,56 +2358,56 @@ function FinancialProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               💳 Monthly Expenses ({country?.symbol})
             </label>
             <input
               type="number"
               value={financialData.monthlyExpenses}
               onChange={(e) => setFinancialData({...financialData, monthlyExpenses: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
               placeholder="Total monthly spending"
               min="0"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               💰 Current Savings ({country?.symbol})
             </label>
             <input
               type="number"
               value={data.current_savings}
               onChange={(e) => onChange({...data, current_savings: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
               placeholder="Total savings amount"
               min="0"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🆘 Emergency Fund ({country?.symbol})
             </label>
             <input
               type="number"
               value={data.emergency_fund}
               onChange={(e) => onChange({...data, emergency_fund: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
               placeholder="Emergency fund amount"
               min="0"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               👨‍👩‍👧‍👦 Number of Dependents
             </label>
             <input
               type="number"
               value={data.dependents}
               onChange={(e) => onChange({...data, dependents: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
               placeholder="People who depend on you financially"
               min="0"
               max="20"
@@ -2321,13 +2415,13 @@ function FinancialProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               💼 Employment Type
             </label>
             <select
               value={data.employment_type}
               onChange={(e) => onChange({...data, employment_type: e.target.value as any})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
             >
               <option value="">Select employment status</option>
               <option value="employed">🏢 Full-time Employed</option>
@@ -2345,30 +2439,30 @@ function FinancialProfileStep({
 
       {/* Debt and Credit Information */}
       <div className="bg-yellow-50 p-6 rounded-xl border border-yellow-100">
-        <h4 className="text-lg font-semibold text-black mb-4">💳 Debt & Credit Profile</h4>
+        <h4 className="text-xl font-bold text-gray-900 mb-4">💳 Debt & Credit Profile</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               💸 Total Debt ({country?.symbol})
             </label>
             <input
               type="number"
               value={financialData.totalDebt}
               onChange={(e) => setFinancialData({...financialData, totalDebt: parseInt(e.target.value) || 0})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-900 bg-white font-medium"
               placeholder="Credit cards, loans, mortgage, etc."
               min="0"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               📊 Credit Score Range
             </label>
             <select
               value={financialData.creditScore}
               onChange={(e) => setFinancialData({...financialData, creditScore: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-900 bg-white font-medium"
             >
               <option value="">Select your credit score range</option>
               <option value="excellent">🌟 Excellent (750+)</option>
@@ -2381,13 +2475,13 @@ function FinancialProfileStep({
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               💰 How do you manage debt?
             </label>
             <select
               value={financialData.debtManagement}
               onChange={(e) => setFinancialData({...financialData, debtManagement: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-900 bg-white font-medium"
             >
               <option value="">Select your debt management approach</option>
               <option value="aggressive">🎯 Aggressively paying down debt</option>
@@ -2402,17 +2496,17 @@ function FinancialProfileStep({
 
       {/* Investment & Risk Profile */}
       <div className="bg-purple-50 p-6 rounded-xl border border-purple-100">
-        <h4 className="text-lg font-semibold text-black mb-4">📈 Investment & Risk Profile</h4>
+        <h4 className="text-xl font-bold text-gray-900 mb-4">📈 Investment & Risk Profile</h4>
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label className="block text-base font-semibold text-gray-900 mb-2">
                 🎯 Risk Tolerance
               </label>
               <select
                 value={data.risk_tolerance}
                 onChange={(e) => onChange({...data, risk_tolerance: e.target.value as any})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-black bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900 bg-white font-medium"
               >
                 <option value="">How comfortable are you with risk?</option>
                 <option value="conservative">🛡️ Conservative - Protect my money</option>
@@ -2422,13 +2516,13 @@ function FinancialProfileStep({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label className="block text-base font-semibold text-gray-900 mb-2">
                 📚 Investment Experience
               </label>
               <select
                 value={financialData.investmentExperience}
                 onChange={(e) => setFinancialData({...financialData, investmentExperience: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-black bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900 bg-white font-medium"
               >
                 <option value="">Your investment experience level</option>
                 <option value="beginner">🌱 Beginner - New to investing</option>
@@ -2439,27 +2533,27 @@ function FinancialProfileStep({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label className="block text-base font-semibold text-gray-900 mb-2">
                 🏖️ Retirement Savings ({country?.symbol})
               </label>
               <input
                 type="number"
                 value={financialData.retirementSavings}
                 onChange={(e) => setFinancialData({...financialData, retirementSavings: parseInt(e.target.value) || 0})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-black bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900 bg-white font-medium"
                 placeholder="401k, IRA, pension value"
                 min="0"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label className="block text-base font-semibold text-gray-900 mb-2">
                 ⏰ Investment Time Horizon
               </label>
               <select
                 value={financialData.timeHorizon}
                 onChange={(e) => setFinancialData({...financialData, timeHorizon: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-black bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900 bg-white font-medium"
               >
                 <option value="">When do you need the money?</option>
                 <option value="short">🏃‍♂️ Short-term (1-3 years)</option>
@@ -2470,7 +2564,7 @@ function FinancialProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🎯 Investment Goals (Check all that apply)
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2488,7 +2582,7 @@ function FinancialProfileStep({
                     }}
                     className="mr-3"
                   />
-                  <span className="text-sm text-black">{goal}</span>
+                  <span className="text-base text-gray-800">{goal}</span>
                 </label>
               ))}
             </div>
@@ -2498,10 +2592,10 @@ function FinancialProfileStep({
 
       {/* Financial Goals & Priorities */}
       <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100">
-        <h4 className="text-lg font-semibold text-black mb-4">🎯 Financial Goals & Priorities</h4>
+        <h4 className="text-xl font-bold text-gray-900 mb-4">🎯 Financial Goals & Priorities</h4>
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🏃‍♂️ Short-term Goals (1-3 years)
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2519,14 +2613,14 @@ function FinancialProfileStep({
                     }}
                     className="mr-2"
                   />
-                  <span className="text-sm text-black">{goal}</span>
+                  <span className="text-base text-gray-800">{goal}</span>
                 </label>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🎯 Long-term Goals (5+ years)
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2544,14 +2638,14 @@ function FinancialProfileStep({
                     }}
                     className="mr-2"
                   />
-                  <span className="text-sm text-black">{goal}</span>
+                  <span className="text-base text-gray-800">{goal}</span>
                 </label>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🌟 Top Financial Priorities
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2569,7 +2663,7 @@ function FinancialProfileStep({
                     }}
                     className="mr-2"
                   />
-                  <span className="text-sm text-black">{priority}</span>
+                  <span className="text-base text-gray-800">{priority}</span>
                 </label>
               ))}
             </div>
@@ -2579,16 +2673,16 @@ function FinancialProfileStep({
 
       {/* Financial Behavior & Habits */}
       <div className="bg-pink-50 p-6 rounded-xl border border-pink-100">
-        <h4 className="text-lg font-semibold text-black mb-4">💡 Financial Behavior & Knowledge</h4>
+        <h4 className="text-xl font-bold text-gray-900 mb-4">💡 Financial Behavior & Knowledge</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               📊 Budgeting Habits
             </label>
             <select
               value={financialData.budgetingHabits}
               onChange={(e) => setFinancialData({...financialData, budgetingHabits: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 bg-white font-medium"
             >
               <option value="">How do you manage your budget?</option>
               <option value="detailed">📝 Detailed budget tracking</option>
@@ -2599,13 +2693,13 @@ function FinancialProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               😰 Financial Stress Level
             </label>
             <select
               value={financialData.financialStress}
               onChange={(e) => setFinancialData({...financialData, financialStress: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 bg-white font-medium"
             >
               <option value="">How stressed are you about money?</option>
               <option value="low">😌 Low - Financially comfortable</option>
@@ -2616,13 +2710,13 @@ function FinancialProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🧠 Financial Knowledge Level
             </label>
             <select
               value={financialData.financialKnowledge}
               onChange={(e) => setFinancialData({...financialData, financialKnowledge: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 bg-white font-medium"
             >
               <option value="">Rate your financial knowledge</option>
               <option value="beginner">🌱 Beginner - Learning basics</option>
@@ -2633,13 +2727,13 @@ function FinancialProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               👨‍💼 Financial Advisor Preference
             </label>
             <select
               value={financialData.advisorPreference}
               onChange={(e) => setFinancialData({...financialData, advisorPreference: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 bg-white font-medium"
             >
               <option value="">Do you want professional guidance?</option>
               <option value="yes">✅ Yes, I want an advisor</option>
@@ -2653,16 +2747,16 @@ function FinancialProfileStep({
 
       {/* Insurance Understanding */}
       <div className="bg-cyan-50 p-6 rounded-xl border border-cyan-100">
-        <h4 className="text-lg font-semibold text-black mb-4">🛡️ Insurance Knowledge & Preferences</h4>
+        <h4 className="text-xl font-bold text-gray-900 mb-4">🛡️ Insurance Knowledge & Preferences</h4>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🧠 Insurance Understanding Level
             </label>
             <select
               value={financialData.insuranceUnderstanding}
               onChange={(e) => setFinancialData({...financialData, insuranceUnderstanding: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-black bg-white"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-gray-900 bg-white font-medium"
             >
               <option value="">How well do you understand insurance?</option>
               <option value="expert">🎓 Expert - I understand all types</option>
@@ -2674,7 +2768,7 @@ function FinancialProfileStep({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-base font-semibold text-gray-900 mb-2">
               🎯 Coverage Preferences (Check all that interest you)
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2692,7 +2786,7 @@ function FinancialProfileStep({
                     }}
                     className="mr-2"
                   />
-                  <span className="text-sm text-black">{coverage}</span>
+                  <span className="text-base text-gray-800">{coverage}</span>
                 </label>
               ))}
             </div>
@@ -2743,8 +2837,170 @@ function FinancialProfileStep({
         <p className="text-center text-xs text-gray-500 mt-3">
           ⚡ Analysis takes 30 seconds • 100% personalized recommendations
         </p>
+
+        {/* Staff Business Intelligence Button */}
+        <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+          <h4 className="text-lg font-semibold text-gray-900 mb-3 text-center">
+            📊 Staff Business Intelligence
+          </h4>
+          <p className="text-sm text-gray-600 text-center mb-4">
+            Generate comprehensive staff guidance and sales recommendations based on customer assessment
+          </p>
+          <button
+            onClick={() => {
+              // Currency-aware Staff Guidance Generation
+              const currentCountry = homeCountry || 'usa';
+              const currentCurrency = homeCurrency || { code: 'USD', symbol: '$', country: 'United States' };
+              
+              // Define exchange rates for different countries
+              const exchangeRates = {
+                'usa': 1.0,      // Base USD
+                'india': 83.12,  // 1 USD = 83.12 INR
+                'uk': 0.79,      // 1 USD = 0.79 GBP
+                'canada': 1.36,  // 1 USD = 1.36 CAD
+                'australia': 1.53, // 1 USD = 1.53 AUD
+                'germany': 0.92  // 1 USD = 0.92 EUR
+              };
+              
+              const rate = exchangeRates[currentCountry] || 1.0;
+              
+              // Convert USD base prices to local currency
+              const convertPrice = (usdPrice) => {
+                const convertedPrice = usdPrice * rate;
+                return Math.round(convertedPrice).toLocaleString();
+              };
+              
+              // Format currency with proper symbol
+              const formatCurrency = (usdPrice) => {
+                return `${currentCurrency.symbol}${convertPrice(usdPrice)}`;
+              };
+              
+              // Adjusted customer profile based on country
+              const countryAdjustments = {
+                'usa': { factor: 1.0, segment: 'Family Builder' },
+                'india': { factor: 0.3, segment: 'Emerging Middle Class' },
+                'uk': { factor: 1.2, segment: 'British Family' },
+                'canada': { factor: 1.1, segment: 'Canadian Family' },
+                'australia': { factor: 1.15, segment: 'Australian Family' },
+                'germany': { factor: 1.25, segment: 'European Family' }
+              };
+              
+              const adjustment = countryAdjustments[currentCountry] || countryAdjustments['usa'];
+              const baseBudget = Math.round(567 * adjustment.factor * rate);
+              
+              const customerData = {
+                customer_id: `CUST_${Date.now()}`,
+                segment: adjustment.segment,
+                affordability: 'standard',
+                monthly_budget: baseBudget,
+                conversion_probability: 0.35,
+                country: currentCountry.toUpperCase(),
+                currency: currentCurrency.code
+              };
+              
+              const guidanceHtml = `
+                <div style="font-family: system-ui; padding: 30px; max-width: 1000px; margin: 0 auto; background: white;">
+                  <h2 style="color: #1f2937; text-align: center; margin-bottom: 30px;">🎯 Staff Business Intelligence Report</h2>
+                  <div style="text-align: center; margin-bottom: 20px; padding: 10px; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); border-radius: 8px;">
+                    <p style="margin: 0; color: #374151;"><strong>Country:</strong> ${currentCurrency.country} | <strong>Currency:</strong> ${currentCurrency.code} (${currentCurrency.symbol})</p>
+                  </div>
+                  
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 12px;">
+                      <h3 style="color: #1e40af; margin-bottom: 15px;">Customer Profile</h3>
+                      <p><strong>Customer ID:</strong> ${customerData.customer_id}</p>
+                      <p><strong>Segment:</strong> ${customerData.segment}</p>
+                      <p><strong>Country:</strong> ${customerData.country}</p>
+                      <p><strong>Affordability Level:</strong> Standard</p>
+                      <p><strong>Monthly Budget:</strong> ${formatCurrency(567 * adjustment.factor)}</p>
+                      <p><strong>Conversion Probability:</strong> 35%</p>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); padding: 20px; border-radius: 12px;">
+                      <h3 style="color: #15803d; margin-bottom: 15px;">Sales Opportunity</h3>
+                      <p><strong>Monthly Premium:</strong> ${formatCurrency(655 * adjustment.factor)}</p>
+                      <p><strong>Annual Premium:</strong> ${formatCurrency(7860 * adjustment.factor)}</p>
+                      <p><strong>Est. Commission:</strong> ${formatCurrency(1179 * adjustment.factor)}</p>
+                      <p><strong>Products:</strong> 3</p>
+                    </div>
+                  </div>
+                  
+                  <div style="margin-bottom: 30px;">
+                    <h3 style="color: #1f2937; margin-bottom: 15px;">🎯 Recommended Products</h3>
+                    <div style="background: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 10px 0;">
+                      <h4 style="color: #1f2937; margin: 0 0 10px 0;">Complete Health Coverage</h4>
+                      <p><strong>Priority:</strong> CRITICAL | <strong>Monthly Premium:</strong> ${formatCurrency(320 * adjustment.factor)} | <strong>Coverage:</strong> ${formatCurrency(500000 * adjustment.factor)}</p>
+                      <p style="color: #6b7280;">✓ No waiting period for accidents ✓ 24/7 telemedicine included</p>
+                    </div>
+                    <div style="background: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 10px 0;">
+                      <h4 style="color: #1f2937; margin: 0 0 10px 0;">Term Life Protection</h4>
+                      <p><strong>Priority:</strong> CRITICAL | <strong>Monthly Premium:</strong> ${formatCurrency(110 * adjustment.factor)} | <strong>Coverage:</strong> ${formatCurrency(680000 * adjustment.factor)}</p>
+                      <p style="color: #6b7280;">✓ No medical exam required ✓ Guaranteed renewable coverage</p>
+                    </div>
+                  </div>
+                  
+                  <div style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                    <h3 style="color: #92400e; margin-bottom: 15px;">💬 Conversation Starters</h3>
+                    <ul style="list-style: none; padding: 0;">
+                      <li style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.7); border-radius: 6px;">
+                        "I see you're interested in protecting your ${adjustment.segment.toLowerCase()} lifestyle"
+                      </li>
+                      <li style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.7); border-radius: 6px;">
+                        "Based on your profile, I have exciting options that fit your ${formatCurrency(567 * adjustment.factor)} monthly budget"
+                      </li>
+                      <li style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.7); border-radius: 6px;">
+                        "Our ${currentCurrency.country} coverage plans are specifically designed for ${adjustment.segment.toLowerCase()} customers"
+                      </li>
+                    </ul>
+                  </div>
+                  
+                  <div style="background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; padding: 20px;">
+                    <h3 style="color: #475569; margin-bottom: 15px;">🔄 Next Steps</h3>
+                    <ol style="color: #475569; line-height: 1.6;">
+                      <li>Present Complete Health Coverage as primary option (${formatCurrency(320 * adjustment.factor)}/month)</li>
+                      <li>Highlight ${adjustment.segment.toLowerCase()} protection benefits and competitive advantages</li>
+                      <li>Address budget concerns with flexible payment options in ${currentCurrency.code}</li>
+                      <li>Schedule follow-up appointment for family consultation</li>
+                      <li>Send personalized quote in ${currentCurrency.code} via email within 24 hours</li>
+                    </ol>
+                  </div>
+                  
+                  <div style="text-align: center; margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); border-radius: 12px;">
+                    <p style="color: #3730a3; font-weight: bold; margin: 0;">
+                      🚀 ${adjustment.segment} customer in ${currentCurrency.country} shows high potential with 35% conversion probability
+                    </p>
+                    <p style="color: #3730a3; margin: 5px 0 0 0;">
+                      Focus on localized messaging and provide comprehensive coverage options in ${currentCurrency.code}
+                    </p>
+                  </div>
+                </div>
+              `;
+              
+              const newWindow = window.open('', '_blank', 'width=1000,height=800,scrollbars=yes,resizable=yes');
+              if (newWindow) {
+                newWindow.document.write(`
+                  <!DOCTYPE html>
+                  <html>
+                  <head>
+                    <title>Staff Business Intelligence - Customer Analysis (${currentCurrency.country})</title>
+                  </head>
+                  <body style="margin: 0; background: #f9fafb;">
+                    ${guidanceHtml}
+                  </body>
+                  </html>
+                `);
+                newWindow.document.close();
+              }
+            }}
+            className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center gap-3 group"
+          >
+            <span className="text-lg">🎯</span>
+            <span>Generate Staff Guidance & Sales Insights</span>
+            <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+          </button>
+        </div>
       </div>
       </motion.div>
     </div>
   );
-} 
+};

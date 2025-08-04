@@ -18,8 +18,8 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ErrorBoundary>
           <CurrencyProvider initialCountry="usa">
-            {children}
-          </CurrencyProvider>
+          {children}
+        </CurrencyProvider>
         </ErrorBoundary>
       </body>
     </html>

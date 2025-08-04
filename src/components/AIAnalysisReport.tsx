@@ -13,10 +13,11 @@ import {
 interface AIAnalysisReportProps {
   isOpen: boolean;
   onClose: () => void;
+  onRetake?: () => void;
   analysisData: any;
 }
 
-export function AIAnalysisReport({ isOpen, onClose, analysisData }: AIAnalysisReportProps) {
+export function AIAnalysisReport({ isOpen, onClose, onRetake, analysisData }: AIAnalysisReportProps) {
   // Currency context integration
   const { homeCurrency, formatHomeAmount, homeCountry, convertToComparison, refreshRates } = useCurrency();
 
@@ -549,6 +550,19 @@ export function AIAnalysisReport({ isOpen, onClose, analysisData }: AIAnalysisRe
                   Download Complete Report
                   <ArrowRight className="w-5 h-5" />
                 </motion.button>
+                
+                {onRetake && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={onRetake}
+                    className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+                  >
+                    <Bot className="w-5 h-5" />
+                    Retake Assessment
+                    <ArrowRight className="w-5 h-5" />
+                  </motion.button>
+                )}
                 
                 <motion.button
                   whileHover={{ scale: 1.05 }}

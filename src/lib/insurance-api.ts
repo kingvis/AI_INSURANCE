@@ -1,7 +1,7 @@
 // Enhanced Insurance API Client for WishInsured Global Finance Portal
 // Multi-country support with financial advice and savings calculations
 
-const API_BASE_URL = 'http://localhost:8004';
+const API_BASE_URL = 'http://localhost:8001';
 
 // Enhanced interfaces for global finance features
 export interface GlobalHealthProfile {

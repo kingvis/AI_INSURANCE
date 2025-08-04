@@ -6,11 +6,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional
 import uvicorn
+import logging
 from datetime import datetime
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Import our enhanced engines
 from insurance_copilot import HealthInsuranceCopilot
 from global_finance_engine import GlobalFinanceEngine
+from business_intelligence import BusinessIntelligenceEngine
 
 app = FastAPI(
     title="WishInsured Global Finance API",
@@ -30,6 +36,7 @@ app.add_middleware(
 # Initialize engines
 health_copilot = HealthInsuranceCopilot()
 finance_engine = GlobalFinanceEngine()
+business_intelligence = BusinessIntelligenceEngine()
 
 # Enhanced Pydantic models
 class GlobalHealthProfile(BaseModel):
@@ -355,5 +362,208 @@ async def get_insurance_types():
         ]
     }
 
+# Business Intelligence Pydantic Models
+class ComprehensiveCustomerData(BaseModel):
+    """Complete customer data from frontend assessment"""
+    customer_id: Optional[str] = None
+    health_data: Dict = {}
+    property_data: Dict = {}
+    financial_data: Dict = {}
+    safety_data: Dict = {}
+    country: str = "US"
+    timestamp: Optional[str] = None
+
+class StaffGuidanceResponse(BaseModel):
+    """Staff guidance response model"""
+    customer_profile: Dict
+    product_recommendations: List[Dict]
+    conversation_starters: List[str]
+    objection_handling: Dict[str, str]
+    next_best_actions: List[str]
+    follow_up_timeline: Dict[str, str]
+    sales_report: Dict
+
+# Business Intelligence Endpoints
+@app.post("/api/v2/staff-guidance", response_model=StaffGuidanceResponse)
+async def generate_staff_guidance(customer_data: ComprehensiveCustomerData):
+    """
+    Generate comprehensive staff guidance for customer interaction
+    
+    This endpoint analyzes complete customer data and provides:
+    - Customer segmentation and profiling
+    - Product recommendations with business rationale
+    - Conversation strategies and objection handling
+    - Follow-up timelines and next best actions
+    - Sales opportunity analysis
+    """
+    try:
+        # Convert Pydantic model to dict for processing
+        data_dict = customer_data.dict()
+        
+        # Generate staff guidance using business intelligence engine
+        staff_guidance = business_intelligence.analyze_customer_data(data_dict)
+        
+        # Generate sales report
+        sales_report = business_intelligence.generate_sales_report(staff_guidance)
+        
+        # Convert dataclasses to dicts for JSON serialization
+        response = {
+            "customer_profile": {
+                "customer_id": staff_guidance.customer_profile.customer_id,
+                "segment": staff_guidance.customer_profile.segment.value,
+                "affordability_level": staff_guidance.customer_profile.affordability_level.value,
+                "risk_profile": staff_guidance.customer_profile.risk_profile.value,
+                "monthly_budget": staff_guidance.customer_profile.monthly_budget,
+                "lifetime_value_estimate": staff_guidance.customer_profile.lifetime_value_estimate,
+                "conversion_probability": staff_guidance.customer_profile.conversion_probability,
+                "key_motivators": staff_guidance.customer_profile.key_motivators,
+                "pain_points": staff_guidance.customer_profile.pain_points,
+                "recommended_approach": staff_guidance.customer_profile.recommended_approach
+            },
+            "product_recommendations": [
+                {
+                    "product_type": rec.product_type,
+                    "product_name": rec.product_name,
+                    "monthly_premium": rec.monthly_premium,
+                    "coverage_amount": rec.coverage_amount,
+                    "priority": rec.priority,
+                    "confidence_score": rec.confidence_score,
+                    "business_rationale": rec.business_rationale,
+                    "upsell_opportunities": rec.upsell_opportunities,
+                    "competitive_advantages": rec.competitive_advantages
+                }
+                for rec in staff_guidance.product_recommendations
+            ],
+            "conversation_starters": staff_guidance.conversation_starters,
+            "objection_handling": staff_guidance.objection_handling,
+            "next_best_actions": staff_guidance.next_best_actions,
+            "follow_up_timeline": staff_guidance.follow_up_timeline,
+            "sales_report": sales_report
+        }
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error generating staff guidance: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate staff guidance: {str(e)}")
+
+@app.get("/api/v2/customer-segments")
+async def get_customer_segments():
+    """Get available customer segments for classification"""
+    return {
+        "segments": [
+            {
+                "id": "young_professional",
+                "name": "Young Professional", 
+                "description": "Ages 22-30, single or newly married, career-focused",
+                "typical_products": ["basic_health", "term_life", "auto"]
+            },
+            {
+                "id": "family_builder",
+                "name": "Family Builder",
+                "description": "Ages 25-40, young families, mortgage holders",
+                "typical_products": ["comprehensive_health", "life", "property", "auto"]
+            },
+            {
+                "id": "established_family",
+                "name": "Established Family",
+                "description": "Ages 35-55, peak earning years, multiple dependents",
+                "typical_products": ["premium_health", "whole_life", "comprehensive_property", "auto"]
+            },
+            {
+                "id": "pre_retiree",
+                "name": "Pre-Retiree",
+                "description": "Ages 50-65, planning for retirement, wealth preservation",
+                "typical_products": ["health_plus", "life_conversion", "property", "travel"]
+            },
+            {
+                "id": "retiree",
+                "name": "Retiree",
+                "description": "Ages 65+, fixed income, healthcare focus",
+                "typical_products": ["medicare_supplement", "long_term_care", "property"]
+            },
+            {
+                "id": "high_net_worth",
+                "name": "High Net Worth",
+                "description": "High income/assets, premium service expectations",
+                "typical_products": ["executive_health", "universal_life", "umbrella", "luxury_auto"]
+            },
+            {
+                "id": "budget_conscious",
+                "name": "Budget Conscious",
+                "description": "Price-sensitive, basic coverage needs",
+                "typical_products": ["basic_health", "term_life", "liability_auto"]
+            }
+        ]
+    }
+
+@app.get("/api/v2/product-catalog")
+async def get_product_catalog():
+    """Get complete product catalog with business information"""
+    return {
+        "catalog": business_intelligence.product_catalog,
+        "pricing_models": business_intelligence.pricing_models,
+        "market_data": {
+            "conversion_rates": business_intelligence.market_data["conversion_rates"],
+            "lifetime_value_multipliers": business_intelligence.market_data["lifetime_value_multipliers"]
+        }
+    }
+
+@app.post("/api/v2/quick-profile")
+async def generate_quick_profile(customer_data: ComprehensiveCustomerData):
+    """
+    Generate quick customer profile for initial assessment
+    """
+    try:
+        data_dict = customer_data.dict()
+        staff_guidance = business_intelligence.analyze_customer_data(data_dict)
+        
+        return {
+            "customer_id": staff_guidance.customer_profile.customer_id,
+            "segment": staff_guidance.customer_profile.segment.value,
+            "affordability": staff_guidance.customer_profile.affordability_level.value,
+            "risk_profile": staff_guidance.customer_profile.risk_profile.value,
+            "monthly_budget": staff_guidance.customer_profile.monthly_budget,
+            "lifetime_value": staff_guidance.customer_profile.lifetime_value_estimate,
+            "conversion_probability": staff_guidance.customer_profile.conversion_probability,
+            "top_products": [rec.product_name for rec in staff_guidance.product_recommendations[:3]],
+            "total_monthly_premium": sum(rec.monthly_premium for rec in staff_guidance.product_recommendations),
+            "recommended_approach": staff_guidance.customer_profile.recommended_approach
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating quick profile: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate profile: {str(e)}")
+
+@app.get("/api/v2/dashboard/metrics")
+async def get_dashboard_metrics():
+    """Get key metrics for staff dashboard"""
+    return {
+        "conversion_rates": business_intelligence.market_data["conversion_rates"],
+        "average_premiums": {
+            "health_basic": 150,
+            "health_standard": 300,
+            "health_premium": 600,
+            "life_term": 100,
+            "life_whole": 500,
+            "property_basic": 80,
+            "property_comprehensive": 200,
+            "auto_liability": 120,
+            "auto_comprehensive": 250
+        },
+        "commission_rates": {
+            "health": 0.15,
+            "life": 0.22,
+            "property": 0.12,
+            "auto": 0.10
+        },
+        "product_priorities": [
+            {"product": "health_insurance", "priority": "critical", "conversion_rate": 0.35},
+            {"product": "life_insurance", "priority": "required", "conversion_rate": 0.28},
+            {"product": "property_insurance", "priority": "recommended", "conversion_rate": 0.25},
+            {"product": "auto_insurance", "priority": "required", "conversion_rate": 0.30}
+        ]
+    }
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8003) 
+    uvicorn.run(app, host="0.0.0.0", port=8001) 
