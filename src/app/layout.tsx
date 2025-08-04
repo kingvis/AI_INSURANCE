@@ -1,20 +1,26 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import './globals.css';
+import type { Metadata } from 'next';
+import { CurrencyProvider } from '@/contexts/CurrencyContext';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
 
 export const metadata: Metadata = {
-  title: "Next.js Framework",
-  description: "A comprehensive, production-ready Next.js framework with all the tools you need to build modern web applications.",
+  title: 'WishInsured - Global Financial Intelligence Platform',
+  description: 'Smart Insurance, Investment Planning & Wealth Building',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        {children}
+        <ErrorBoundary>
+          <CurrencyProvider initialCountry="usa">
+            {children}
+          </CurrencyProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

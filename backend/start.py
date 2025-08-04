@@ -15,15 +15,15 @@ def main():
     """Start the development server"""
     print("🏥 Starting AI Health Copilot Backend...")
     print("🔧 Development Mode: Auto-reload enabled")
-    print("📡 Server will be available at: http://localhost:8000")
-    print("📚 API Documentation: http://localhost:8000/docs")
-    print("🔍 Health Check: http://localhost:8000/health")
+    print("📡 Server will be available at: http://localhost:8001")
+    print("📚 API Documentation: http://localhost:8001/docs")
+    print("🔍 Health Check: http://localhost:8001/health")
     print("\n" + "="*50)
     
     # Import and run
     try:
         import uvicorn
-        from api_server import app
+        from insurance_api import app
         
         # Create necessary directories
         os.makedirs("logs", exist_ok=True)
@@ -31,9 +31,9 @@ def main():
         
         # Run the server
         uvicorn.run(
-            "api_server:app",
+            "insurance_api:app",
             host="0.0.0.0",
-            port=8000,
+            port=8001,
             reload=True,
             log_level="info",
             access_log=True

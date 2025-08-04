@@ -1,7 +1,7 @@
 // Enhanced Insurance API Client for WishInsured Global Finance Portal
 // Multi-country support with financial advice and savings calculations
 
-const API_BASE_URL = 'http://localhost:8001';
+const API_BASE_URL = 'http://localhost:8004';
 
 // Enhanced interfaces for global finance features
 export interface GlobalHealthProfile {
@@ -41,8 +41,35 @@ export interface GlobalFinancialProfile {
 
 export interface Country {
   name: string;
+  code: string; // Add country code property
   currency: string;
   symbol: string;
+  flag?: string;
+  economic_stability?: string;
+  inflation_rate?: number;
+  interest_rates?: {
+    savings: number;
+    investment: number;
+    conservative: number;
+  };
+  cultural_context?: {
+    financial_priorities: string[];
+    investment_preference: string;
+    typical_savings_rate: number;
+    retirement_age: number;
+    social_security: boolean;
+  };
+  tax_advantages?: string[];
+  living_costs?: {
+    housing_percentage: number;
+    essential_expenses: number;
+    discretionary: number;
+  };
+  motivational_culture?: {
+    success_metrics: string[];
+    financial_heroes: string[];
+    common_goals: string[];
+  };
 }
 
 export interface CountryPremium {
@@ -64,45 +91,31 @@ export interface InsuranceRecommendation {
 }
 
 export interface FinancialAdvice {
-  country_context: {
-    retirement_age: number;
-    tax_rate: number;
-    avg_salary: number;
-    currency: string;
-    symbol: string;
-  };
-  monthly_analysis: {
-    income: number;
-    estimated_expenses: number;
-    disposable_income: number;
-    savings_rate: number;
-  };
-  emergency_fund: {
-    target_amount: number;
-    months_to_build: number;
-    priority: string;
-  };
-  insurance_recommendations: {
-    monthly_budget: number;
-    percentage_of_income: string;
-    priority_order: string[];
-  };
-  investment_strategy: {
-    monthly_capacity: number;
-    recommended_allocation: Record<string, number>;
-    tax_advantages: string[];
-    investment_options: string[];
-  };
-  financial_independence: {
-    fire_number: number;
-    current_savings: number;
-    projected_retirement_fund: number;
-    monthly_investment_needed: number;
+  country: string;
+  currency_symbol: string;
+  recommendations: {
+    emergency_fund_target: number;
+    monthly_savings_target: number;
+    retirement_target: number;
     years_to_retirement: number;
-    fire_timeline_years?: number;
-    financial_independence_age?: number;
-    monthly_passive_income_at_retirement: number;
-    motivational_message: string;
+  };
+  current_status: {
+    savings_rate: number;
+    emergency_fund_coverage: number;
+  };
+  tips: string[];
+  cultural_priorities?: string[];
+  recommended_tax_advantages?: string[];
+  investment_preference?: string;
+  economic_context?: {
+    inflation_rate: number;
+    economic_stability: string;
+    typical_savings_rate: number;
+  };
+  motivational_context?: {
+    success_metrics: string[];
+    financial_heroes: string[];
+    common_goals: string[];
   };
 }
 
@@ -209,10 +222,191 @@ export interface GlobalAssessmentResult {
 // API Functions
 
 export async function getSupportedCountries(): Promise<Record<string, Country>> {
-  const response = await fetch(`${API_BASE_URL}/countries`);
-  if (!response.ok) throw new Error('Failed to fetch countries');
-  const data = await response.json();
-  return data.countries;
+  try {
+    const response = await fetch(`${API_BASE_URL}/countries`);
+    if (!response.ok) {
+      // Fallback to enhanced local country data
+      return getEnhancedCountryData();
+    }
+    return response.json();
+  } catch (error) {
+    console.warn('Using enhanced local country data:', error);
+    return getEnhancedCountryData();
+  }
+}
+
+// Enhanced country data with cultural, economic, and currency details
+function getEnhancedCountryData(): Record<string, Country> {
+  return {
+    "US": {
+      name: "United States",
+      code: "US",
+      currency: "USD",
+      symbol: "$",
+      flag: "🇺🇸",
+      economic_stability: "high",
+      inflation_rate: 3.2,
+      interest_rates: { savings: 4.5, investment: 7.0, conservative: 4.0 },
+      cultural_context: {
+        financial_priorities: ["retirement", "homeownership", "emergency_fund"],
+        investment_preference: "moderate_aggressive",
+        typical_savings_rate: 13.0,
+        retirement_age: 67,
+        social_security: true
+      },
+      tax_advantages: ["401k", "IRA", "Roth IRA", "HSA"],
+      living_costs: { 
+        housing_percentage: 28,
+        essential_expenses: 65,
+        discretionary: 35 
+      },
+      motivational_culture: {
+        success_metrics: ["net_worth", "passive_income", "early_retirement"],
+        financial_heroes: ["Warren Buffett", "Dave Ramsey", "Suze Orman"],
+        common_goals: ["FIRE movement", "debt freedom", "building wealth"]
+      }
+    },
+    "IN": {
+      name: "India",
+      code: "IN",
+      currency: "INR",
+      symbol: "₹",
+      flag: "🇮🇳",
+      economic_stability: "moderate_high",
+      inflation_rate: 5.8,
+      interest_rates: { savings: 6.0, investment: 12.0, conservative: 7.0 },
+      cultural_context: {
+        financial_priorities: ["family_security", "property", "education", "gold"],
+        investment_preference: "conservative_moderate",
+        typical_savings_rate: 30.0,
+        retirement_age: 60,
+        social_security: false
+      },
+      tax_advantages: ["PPF", "ELSS", "EPF", "NSC", "Tax Saver FD"],
+      living_costs: { 
+        housing_percentage: 35,
+        essential_expenses: 70,
+        discretionary: 30 
+      },
+      motivational_culture: {
+        success_metrics: ["property_ownership", "family_wealth", "gold_accumulation"],
+        financial_heroes: ["Rakesh Jhunjhunwala", "Radhakishan Damani"],
+        common_goals: ["house_purchase", "children_education", "retirement_corpus"]
+      }
+    },
+    "UK": {
+      name: "United Kingdom",
+      code: "UK",
+      currency: "GBP",
+      symbol: "£",
+      flag: "🇬🇧",
+      economic_stability: "high",
+      inflation_rate: 4.1,
+      interest_rates: { savings: 4.0, investment: 6.5, conservative: 3.5 },
+      cultural_context: {
+        financial_priorities: ["pension", "property", "ISA_savings"],
+        investment_preference: "moderate",
+        typical_savings_rate: 8.5,
+        retirement_age: 66,
+        social_security: true
+      },
+      tax_advantages: ["ISA", "Pension", "SIPP", "LISA"],
+      living_costs: { 
+        housing_percentage: 40,
+        essential_expenses: 75,
+        discretionary: 25 
+      },
+      motivational_culture: {
+        success_metrics: ["pension_pot", "property_ladder", "ISA_maximization"],
+        financial_heroes: ["Tim Hale", "Monevator"],
+        common_goals: ["mortgage_free", "pension_planning", "financial_independence"]
+      }
+    },
+    "CA": {
+      name: "Canada",
+      code: "CA",
+      currency: "CAD",
+      symbol: "C$",
+      flag: "🇨🇦",
+      economic_stability: "high",
+      inflation_rate: 3.5,
+      interest_rates: { savings: 4.2, investment: 6.8, conservative: 3.8 },
+      cultural_context: {
+        financial_priorities: ["RRSP", "TFSA", "real_estate"],
+        investment_preference: "moderate",
+        typical_savings_rate: 11.0,
+        retirement_age: 65,
+        social_security: true
+      },
+      tax_advantages: ["RRSP", "TFSA", "RESP"],
+      living_costs: { 
+        housing_percentage: 32,
+        essential_expenses: 68,
+        discretionary: 32 
+      },
+      motivational_culture: {
+        success_metrics: ["RRSP_room", "TFSA_growth", "property_equity"],
+        financial_heroes: ["David Chilton", "Preet Banerjee"],
+        common_goals: ["retirement_security", "home_ownership", "tax_optimization"]
+      }
+    },
+    "AU": {
+      name: "Australia",
+      code: "AU",
+      currency: "AUD",
+      symbol: "A$",
+      flag: "🇦🇺",
+      economic_stability: "high",
+      inflation_rate: 4.3,
+      interest_rates: { savings: 4.8, investment: 7.2, conservative: 4.0 },
+      cultural_context: {
+        financial_priorities: ["superannuation", "property", "shares"],
+        investment_preference: "moderate_aggressive",
+        typical_savings_rate: 9.5,
+        retirement_age: 67,
+        social_security: true
+      },
+      tax_advantages: ["Superannuation", "FHSS", "CGT_discount"],
+      living_costs: { 
+        housing_percentage: 25,
+        essential_expenses: 65,
+        discretionary: 35 
+      },
+      motivational_culture: {
+        success_metrics: ["super_balance", "property_portfolio", "share_investments"],
+        financial_heroes: ["Scott Pape", "Peter Thornhill"],
+        common_goals: ["super_optimization", "property_investment", "early_retirement"]
+      }
+    },
+    "DE": {
+      name: "Germany",
+      code: "DE",
+      currency: "EUR",
+      symbol: "€",
+      flag: "🇩🇪",
+      economic_stability: "high",
+      inflation_rate: 3.8,
+      interest_rates: { savings: 3.0, investment: 5.5, conservative: 2.5 },
+      cultural_context: {
+        financial_priorities: ["security", "insurance", "conservative_growth"],
+        investment_preference: "conservative",
+        typical_savings_rate: 17.0,
+        retirement_age: 67,
+        social_security: true
+      },
+      tax_advantages: ["Riester", "Rürup", "ETF_Sparplan"],
+      living_costs: { 
+        housing_percentage: 30,
+        essential_expenses: 70,
+        discretionary: 30 
+      },
+      motivational_culture: {
+        success_metrics: ["security_first", "long_term_stability", "insurance_coverage"],
+        financial_heroes: ["Gerd Kommer", "Finanzwesir"],
+        common_goals: ["financial_security", "insurance_optimization", "steady_growth"]
+      }
+    }
+  };
 }
 
 export async function getComprehensiveGlobalAssessment(
@@ -249,21 +443,85 @@ export async function calculateSavingsProjection(
   };
   calculation_date: string;
 }> {
-  const response = await fetch(`${API_BASE_URL}/calculate-savings-projection`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      monthly_amount: monthlyAmount,
-      years,
-      country,
-      risk_level: riskLevel,
-    }),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/calculate-savings-projection`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        monthly_amount: monthlyAmount,
+        years,
+        country,
+        risk_level: riskLevel,
+      }),
+    });
+    
+    if (!response.ok) throw new Error('Failed to calculate savings projection');
+    return response.json();
+  } catch (error) {
+    console.warn('Backend API not available, using mock calculation:', error);
+    // Fallback to mock calculation
+    const mockResult = calculateMockSavingsProjection(monthlyAmount, years, country, riskLevel);
+    return {
+      ...mockResult,
+      request_details: {
+        monthly_amount: monthlyAmount,
+        years: years,
+        country: country,
+        risk_level: riskLevel
+      },
+      calculation_date: new Date().toISOString()
+    };
+  }
+}
+
+// Mock calculation function for offline mode
+function calculateMockSavingsProjection(monthlyAmount: number, years: number, country: string, riskLevel: string) {
+  const returnRates = {
+    conservative: 0.04,
+    moderate: 0.07,
+    aggressive: 0.10
+  };
   
-  if (!response.ok) throw new Error('Failed to calculate savings projection');
-  return response.json();
+  const rate = returnRates[riskLevel as keyof typeof returnRates] || 0.07;
+  const monthlyRate = rate / 12;
+  const months = years * 12;
+  
+  // Calculate compound interest
+  const futureValue = monthlyAmount * (((1 + monthlyRate) ** months - 1) / monthlyRate);
+  const totalContributed = monthlyAmount * months;
+  const totalInterest = futureValue - totalContributed;
+  
+  const currency = country === 'US' ? 'USD' : country === 'IN' ? 'INR' : country === 'UK' ? 'GBP' : 'USD';
+  const symbol = country === 'US' ? '$' : country === 'IN' ? '₹' : country === 'UK' ? '£' : '$';
+  
+  return {
+    projections: {
+      simple_savings: {
+        total: Math.round(totalContributed),
+        monthly: monthlyAmount,
+        currency: currency,
+        symbol: symbol
+      },
+      investment_growth: {
+        total: Math.round(futureValue),
+        gains: Math.round(totalInterest),
+        return_rate: `${(rate * 100).toFixed(1)}%`,
+        after_tax: Math.round(futureValue * 0.85) // Assuming 15% tax
+      },
+      comparison: {
+        additional_wealth: Math.round(totalInterest),
+        wealth_multiplier: Math.round(futureValue / totalContributed * 100) / 100,
+        monthly_passive_income: Math.round(futureValue * 0.04 / 12)
+      },
+      milestones: [
+        { amount: Math.round(monthlyAmount * 60 * 1.4), years: 5, currency: currency, symbol: symbol, monthly_income: Math.round(monthlyAmount * 60 * 1.4 * 0.04 / 12) },
+        { amount: Math.round(monthlyAmount * 120 * 1.8), years: 10, currency: currency, symbol: symbol, monthly_income: Math.round(monthlyAmount * 120 * 1.8 * 0.04 / 12) },
+        { amount: Math.round(monthlyAmount * 180 * 2.4), years: 15, currency: currency, symbol: symbol, monthly_income: Math.round(monthlyAmount * 180 * 2.4 * 0.04 / 12) }
+      ].filter(m => m.years <= years)
+    }
+  };
 }
 
 export async function getFinancialAdvice(
@@ -539,15 +797,22 @@ export function calculateCompoundGrowth(
 }
 
 export function getCountryFlag(countryCode: string): string {
-  const flags: Record<string, string> = {
-    'US': '🇺🇸',
-    'IN': '🇮🇳',
-    'UK': '🇬🇧',
-    'CA': '🇨🇦',
-    'AU': '🇦🇺',
-    'DE': '🇩🇪'
+  // Map country codes to flag image URLs using flagcdn.com
+  const flagUrls: Record<string, string> = {
+    'US': 'https://flagcdn.com/w20/us.png',
+    'IN': 'https://flagcdn.com/w20/in.png',
+    'UK': 'https://flagcdn.com/w20/gb.png', // UK uses GB code
+    'CA': 'https://flagcdn.com/w20/ca.png',
+    'AU': 'https://flagcdn.com/w20/au.png',
+    'DE': 'https://flagcdn.com/w20/de.png'
   };
-  return flags[countryCode] || '🌍';
+  return flagUrls[countryCode] || 'https://flagcdn.com/w20/un.png'; // Default to UN flag
+}
+
+// New function to get country flag as image element
+export function getCountryFlagImage(countryCode: string, size: number = 20): string {
+  const flagUrl = getCountryFlag(countryCode);
+  return `<img src="${flagUrl}" alt="${countryCode} flag" width="${size}" height="${Math.round(size * 0.75)}" style="border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);" />`;
 }
 
 export function getWealthMilestoneMessage(amount: number, symbol: string): string {

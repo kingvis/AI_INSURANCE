@@ -274,9 +274,9 @@ async def get_motivational_content(
 async def calculate_bmi_global(
     height: float = Query(..., gt=0),
     weight: float = Query(..., gt=0),
-         country: str = Query(..., pattern="^(US|IN|UK|CA|AU|DE)$")
- ):
-     """Calculate BMI with country-specific health recommendations"""
+    country: str = Query(..., pattern="^(US|IN|UK|CA|AU|DE)$")
+):
+    """Calculate BMI with country-specific health recommendations"""
     try:
         bmi_data = health_copilot.calculate_bmi(height, weight)
         
@@ -356,4 +356,4 @@ async def get_insurance_types():
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001) 
+    uvicorn.run(app, host="0.0.0.0", port=8003) 
