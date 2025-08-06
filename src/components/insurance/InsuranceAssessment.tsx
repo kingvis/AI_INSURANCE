@@ -2849,7 +2849,7 @@ function FinancialProfileStep({
           <button
             onClick={() => {
               // Currency-aware Staff Guidance Generation
-              const currentCountry = countryData.code.toLowerCase() || 'usa';
+              const currentCountry = (homeCountry || 'US').toLowerCase();
               const currentCurrency = homeCurrency || { code: 'USD', symbol: '$', country: 'United States' };
               
               // Define exchange rates for different countries
