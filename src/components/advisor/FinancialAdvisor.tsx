@@ -473,6 +473,8 @@ export function FinancialAdvisor({
       
       // Fallback to basic advice if mock generation fails
       setAdvice({
+        country: homeCountry || 'US',
+        currency_symbol: homeCurrency?.symbol || '$',
         recommendations: {
           emergency_fund_target: profileData.annual_income * 0.25,
           monthly_savings_target: profileData.annual_income * 0.20 / 12,
@@ -491,6 +493,16 @@ export function FinancialAdvisor({
             "Consider low-cost index funds for investments"
           ]
         },
+        current_status: {
+          savings_rate: 15,
+          emergency_fund_coverage: 2
+        },
+        tips: [
+          "Start with an emergency fund before investing",
+          "Consider employer 401(k) matching if available",
+          "Review and reduce unnecessary monthly subscriptions",
+          "Set up automatic savings to build the habit"
+        ],
         analysis: {
           risk_profile: profileData.risk_tolerance,
           financial_health_score: 75,
