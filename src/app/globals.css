@@ -32,6 +32,65 @@ pre {
   outline-offset: 2px;
 }
 
+/* Hide Next.js development indicators */
+[data-next-badge-root="true"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  display: none !important;
+}
+
+/* Alternative selectors for Next.js badges */
+div[style*="--size: 36px"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  display: none !important;
+}
+
+/* Hide any development badges */
+.__next-badge,
+[data-nextjs-badge],
+[data-next-root],
+div[style*="duration-short: 150ms"],
+div[style*="display: block"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  display: none !important;
+}
+
+/* Target the specific Next.js badge from screenshot */
+div[data-next-badge-root="true"][style*="--size: 36px"][style*="--duration-short: 150ms"][style*="display: block"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Additional Next.js development UI selectors */
+div[style*="z-index: 9999"]:has([data-next-badge-root]),
+div[style*="position: fixed"]:has([data-next-badge-root]) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  display: none !important;
+}
+
+/* Universal Next.js badge killer - matches any element with those exact inline styles */
+*[style*="--size: 36px"][style*="--duration-short: 150ms"],
+*[style*="36px"][style*="150ms"][style*="display: block"],
+*[data-next-badge-root] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  display: none !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+}
+
+/* Hide all development overlays */
+div[style*="position: fixed"][style*="z-index"] {
+  opacity: 0 !important;
+}
+
 /* Enhanced background animations */
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(0deg); }

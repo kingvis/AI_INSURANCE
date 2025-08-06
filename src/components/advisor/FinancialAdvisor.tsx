@@ -474,6 +474,10 @@ export function FinancialAdvisor({
       // Fallback to basic advice if mock generation fails
       setAdvice({
         recommendations: {
+          emergency_fund_target: profileData.annual_income * 0.25,
+          monthly_savings_target: profileData.annual_income * 0.20 / 12,
+          retirement_target: profileData.annual_income * 10,
+          years_to_retirement: 65 - profileData.age,
           primary_recommendation: "Start with a savings goal of 20% of your income",
           budget_allocation: {
             savings: 20,
@@ -485,8 +489,7 @@ export function FinancialAdvisor({
             "Set up automatic savings transfers",
             "Review and optimize monthly expenses",
             "Consider low-cost index funds for investments"
-          ],
-          emergency_fund_target: profileData.annual_income * 0.25
+          ]
         },
         analysis: {
           risk_profile: profileData.risk_tolerance,

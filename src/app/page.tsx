@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSupabase } from "@/hooks/useSupabase";
+
 import { Button } from "@/components/ui/Button";
-import { Loading } from "@/components/ui/Loading";
 import { CountryFlag } from "@/components/ui/CountryFlag";
-import { RobustCountryFlag } from "@/components/ui/RobustCountryFlag";
 import { InlineCountryFlag } from "@/components/ui/InlineCountryFlag";
 import { FlyingCashBackground } from "@/components/ui/FlyingCashBackground";
 import { TorchLightEffect } from "@/components/ui/TorchLightEffect";
@@ -26,30 +24,16 @@ import {
   Sun,
   Moon,
   Globe,
-  TrendingUp,
-  Shield,
-  Target,
-  DollarSign,
-  BarChart3,
-  Zap,
-  BookOpen,
-  Star,
-  Trophy,
-  Clock,
   ChevronDown,
   X
 } from "lucide-react";
 
 import {
   type Country,
-  type GlobalAssessmentResult,
-  type GlobalFinancialProfile,
-  getSupportedCountries,
-  formatCurrency
+  type GlobalAssessmentResult
 } from "@/lib/insurance-api";
 
 export default function WishInsuredHome() {
-  const { user, loading } = useSupabase();
   const [theme, setTheme] = useLocalStorage("theme", "light");
   const [activeTab, setActiveTab] = useState("overview");
   const { setHomeCountry } = useCurrency();
@@ -235,7 +219,7 @@ export default function WishInsuredHome() {
                       </option>
                       <option value="DE" style={{ color: '#000000', backgroundColor: '#ffffff', padding: '8px' }}>
                         🇩🇪 Germany (EUR)
-                      </option>
+                        </option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-600 pointer-events-none" />
                   </div>
@@ -244,7 +228,7 @@ export default function WishInsuredHome() {
                   <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-lg border-2 border-blue-200 min-w-[220px]">
                     <div className="flex items-center justify-center w-16 h-16 bg-blue-50 rounded-xl relative border-2 border-blue-200">
                       <InlineCountryFlag 
-                        countryCode={selectedCountry}
+                      countryCode={selectedCountry}
                         size={56}
                         className=""
                       />
@@ -299,19 +283,19 @@ export default function WishInsuredHome() {
                   <div className="flex-grow">
                     <div className="flex items-center justify-between mb-4 min-h-[48px]">
                       <div className="bg-blue-100 p-3 rounded-xl flex items-center justify-center w-12 h-12">
-                        <Activity className="w-6 h-6 text-blue-600" />
-                      </div>
-                      <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">
-                        Complete Analysis
-                      </span>
+                      <Activity className="w-6 h-6 text-blue-600" />
                     </div>
+                      <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">
+                      Complete Analysis
+                    </span>
+                  </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-3 min-h-[56px] flex items-center">
-                      Insurance Assessment
-                    </h3>
+                    Insurance Assessment
+                  </h3>
                     <p className="text-gray-600 mb-6 leading-relaxed">
                       Get comprehensive insurance recommendations with local currency pricing, 
-                      BMI analysis, and risk assessment.
-                    </p>
+                    BMI analysis, and risk assessment.
+                  </p>
                   </div>
                   <Button
                     onClick={() => setShowInsuranceAssessment(true)}
@@ -327,19 +311,19 @@ export default function WishInsuredHome() {
                   <div className="flex-grow">
                     <div className="flex items-center justify-between mb-4 min-h-[48px]">
                       <div className="bg-green-100 p-3 rounded-xl flex items-center justify-center w-12 h-12">
-                        <PiggyBank className="w-6 h-6 text-green-600" />
-                      </div>
-                      <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full whitespace-nowrap">
-                        Projections
-                      </span>
+                      <PiggyBank className="w-6 h-6 text-green-600" />
                     </div>
+                      <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full whitespace-nowrap">
+                      Projections
+                    </span>
+                  </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-3 min-h-[56px] flex items-center">
-                      Savings Calculator
-                    </h3>
+                    Savings Calculator
+                  </h3>
                     <p className="text-gray-600 mb-6 leading-relaxed">
-                      Calculate compound growth, investment returns, and wealth milestones 
+                    Calculate compound growth, investment returns, and wealth milestones 
                       in your local currency.
-                    </p>
+                  </p>
                   </div>
                   <Button
                     onClick={() => setShowSavingsCalculator(true)}
@@ -355,19 +339,19 @@ export default function WishInsuredHome() {
                   <div className="flex-grow">
                     <div className="flex items-center justify-between mb-4 min-h-[48px]">
                       <div className="bg-purple-100 p-3 rounded-xl flex items-center justify-center w-12 h-12">
-                        <Lightbulb className="w-6 h-6 text-purple-600" />
-                      </div>
-                      <span className="text-sm font-medium text-purple-600 bg-purple-50 px-3 py-1 rounded-full whitespace-nowrap">
-                        AI Powered
-                      </span>
+                      <Lightbulb className="w-6 h-6 text-purple-600" />
                     </div>
+                      <span className="text-sm font-medium text-purple-600 bg-purple-50 px-3 py-1 rounded-full whitespace-nowrap">
+                      AI Powered
+                    </span>
+                  </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-3 min-h-[56px] flex items-center">
-                      Smart Financial Advisor
-                    </h3>
+                    Smart Financial Advisor
+                  </h3>
                     <p className="text-gray-600 mb-6 leading-relaxed">
-                      Get personalized financial advice, investment strategies, and 
-                      wealth optimization tips for your goals.
-                    </p>
+                    Get personalized financial advice, investment strategies, and 
+                    wealth optimization tips for your goals.
+                  </p>
                   </div>
                   <Button
                     onClick={() => setShowFinancialAdvisor(true)}
@@ -383,19 +367,19 @@ export default function WishInsuredHome() {
                   <div className="flex-grow">
                     <div className="flex items-center justify-between mb-4 min-h-[48px]">
                       <div className="bg-orange-100 p-3 rounded-xl flex items-center justify-center w-12 h-12">
-                        <Rocket className="w-6 h-6 text-orange-600" />
-                      </div>
-                      <span className="text-sm font-medium text-orange-600 bg-orange-50 px-3 py-1 rounded-full whitespace-nowrap">
-                        Independence
-                      </span>
+                      <Rocket className="w-6 h-6 text-orange-600" />
                     </div>
+                      <span className="text-sm font-medium text-orange-600 bg-orange-50 px-3 py-1 rounded-full whitespace-nowrap">
+                      Independence
+                    </span>
+                  </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-3 min-h-[56px] flex items-center">
-                      FIRE Goals
-                    </h3>
+                    FIRE Goals
+                  </h3>
                     <p className="text-gray-600 mb-6 leading-relaxed">
-                      Plan your path to Financial Independence Retire Early with goal tracking 
-                      and milestone planning framework.
-                    </p>
+                    Plan your path to Financial Independence Retire Early with goal tracking 
+                    and milestone planning framework.
+                  </p>
                   </div>
                   <Button
                     onClick={() => setShowFIREGoals(true)}

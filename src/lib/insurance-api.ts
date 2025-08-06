@@ -98,6 +98,14 @@ export interface FinancialAdvice {
     monthly_savings_target: number;
     retirement_target: number;
     years_to_retirement: number;
+    primary_recommendation?: string;
+    budget_allocation?: {
+      savings: number;
+      investments: number;
+      emergency_fund: number;
+      insurance: number;
+    };
+    specific_actions?: string[];
   };
   current_status: {
     savings_rate: number;

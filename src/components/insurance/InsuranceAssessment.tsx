@@ -29,7 +29,7 @@ export function InsuranceAssessment({
   onClose,
   onAssessmentComplete
 }: InsuranceAssessmentProps) {
-  // Currency context integration  
+  // Currency context integration
   const { homeCountry, homeCurrency, formatHomeAmount } = useCurrency();
   const { format, symbol } = useCurrencyConverter();
 
@@ -1216,15 +1216,15 @@ Version: 1.0
         {/* Footer */}
         <div className="bg-gray-50 px-6 py-4 flex justify-between items-center">
           <div className="flex gap-3">
-            <Button
-              onClick={handlePrevious}
-              variant="outline"
-              disabled={currentStep === 1}
-              className="flex items-center gap-2"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Previous
-            </Button>
+          <Button
+            onClick={handlePrevious}
+            variant="outline"
+            disabled={currentStep === 1}
+            className="flex items-center gap-2"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Previous
+          </Button>
             
             <Button
               onClick={handleRetakeAssessment}
