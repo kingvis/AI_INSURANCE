@@ -426,7 +426,7 @@ export function FIREGoals({
                             const usdAmount = fireData.target_net_worth * 0.04;
                             const convertedAmount = homeCurrency?.code === 'USD' 
                               ? usdAmount 
-                              : convertToComparison();
+                              : convertToComparison(usdAmount);
                             return formatHomeAmount(convertedAmount);
                           })()} 
                           annual spending using the 4% rule! 
@@ -478,7 +478,7 @@ export function FIREGoals({
                             const usdAmount = fireData.monthly_savings * 12;
                             const convertedAmount = homeCurrency?.code === 'USD' 
                               ? usdAmount 
-                              : convertToComparison();
+                              : convertToComparison(usdAmount);
                             return formatHomeAmount(convertedAmount);
                           })()} per year! 
                           {fireData.monthly_savings < 500 ? " Every dollar counts - keep it up! 🌟" : 
@@ -546,7 +546,7 @@ export function FIREGoals({
                             const usdAmount = projectedValue;
                             const convertedAmount = homeCurrency?.code === 'USD' 
                               ? usdAmount 
-                              : convertToComparison();
+                              : convertToComparison(usdAmount);
                             console.log(`🔥 Projected Value: $${usdAmount} USD → ${formatHomeAmount(convertedAmount)} (${homeCountry})`);
                             return formatHomeAmount(convertedAmount);
                           })()}
@@ -561,7 +561,7 @@ export function FIREGoals({
                             const usdAmount = fireData.target_net_worth;
                             const convertedAmount = homeCurrency?.code === 'USD' 
                               ? usdAmount 
-                              : convertToComparison();
+                              : convertToComparison(usdAmount);
                             console.log(`🎯 Target: $${usdAmount} USD → ${formatHomeAmount(convertedAmount)} (${homeCountry})`);
                             return formatHomeAmount(convertedAmount);
                           })()}
@@ -673,13 +673,13 @@ export function FIREGoals({
                       const currentUSD = fireData.current_net_worth;
                       const currentConverted = homeCurrency?.code === 'USD' 
                         ? currentUSD 
-                        : convertToComparison();
+                        : convertToComparison(usdAmount);
                       
                       // Convert target from USD to current currency  
                       const targetUSD = fireData.target_net_worth;
                       const targetConverted = homeCurrency?.code === 'USD' 
                         ? targetUSD 
-                        : convertToComparison();
+                        : convertToComparison(usdAmount);
                       
                       console.log(`🔥 Progress: $${currentUSD} USD → ${formatHomeAmount(currentConverted)} of $${targetUSD} USD → ${formatHomeAmount(targetConverted)} (${homeCountry})`);
                       return `${formatHomeAmount(currentConverted)} of ${formatHomeAmount(targetConverted)}`;
@@ -731,7 +731,7 @@ export function FIREGoals({
                         const usdAmount = fireData.monthly_savings;
                         const convertedAmount = homeCurrency?.code === 'USD' 
                           ? usdAmount 
-                          : convertToComparison();
+                          : convertToComparison(usdAmount);
                         console.log(`💰 Monthly Savings: $${usdAmount} USD → ${formatHomeAmount(convertedAmount)} (${homeCountry})`);
                         return formatHomeAmount(convertedAmount);
                       })()}
@@ -742,7 +742,7 @@ export function FIREGoals({
                         const usdAmount = fireData.monthly_savings * 12;
                         const convertedAmount = homeCurrency?.code === 'USD' 
                           ? usdAmount 
-                          : convertToComparison();
+                          : convertToComparison(usdAmount);
                         return `${formatHomeAmount(convertedAmount)} per year`;
                       })()}
                     </p>
@@ -761,7 +761,7 @@ export function FIREGoals({
                         const usdAmount = fireData.target_net_worth * 0.04 / 12;
                         const convertedAmount = homeCurrency?.code === 'USD' 
                           ? usdAmount 
-                          : convertToComparison();
+                          : convertToComparison(usdAmount);
                         console.log(`🏖️ Freedom Income: $${usdAmount} USD → ${formatHomeAmount(convertedAmount)} (${homeCountry})`);
                         return formatHomeAmount(convertedAmount);
                       })()}
