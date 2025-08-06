@@ -125,6 +125,13 @@ export interface FinancialAdvice {
     financial_heroes: string[];
     common_goals: string[];
   };
+  analysis?: {
+    risk_profile: string;
+    financial_health_score: number;
+    key_strengths: string[];
+    areas_for_improvement: string[];
+    next_steps: string[];
+  };
 }
 
 export interface SavingsProjection {
