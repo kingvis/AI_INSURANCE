@@ -495,7 +495,8 @@ export function FinancialAdvisor({
           risk_profile: profileData.risk_tolerance,
           financial_health_score: 75,
           key_strengths: ["Steady income", "Interest in financial planning"],
-          improvement_areas: ["Emergency fund building", "Investment diversification"]
+          areas_for_improvement: ["Emergency fund building", "Investment diversification"],
+          next_steps: ["Start automated savings", "Research investment options", "Build emergency fund"]
         }
       });
     } finally {
