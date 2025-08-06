@@ -673,13 +673,13 @@ export function FIREGoals({
                       const currentUSD = fireData.current_net_worth;
                       const currentConverted = homeCurrency?.code === 'USD' 
                         ? currentUSD 
-                        : convertToComparison(usdAmount);
+                        : convertToComparison(currentUSD);
                       
                       // Convert target from USD to current currency  
                       const targetUSD = fireData.target_net_worth;
                       const targetConverted = homeCurrency?.code === 'USD' 
                         ? targetUSD 
-                        : convertToComparison(usdAmount);
+                        : convertToComparison(targetUSD);
                       
                       console.log(`🔥 Progress: $${currentUSD} USD → ${formatHomeAmount(currentConverted)} of $${targetUSD} USD → ${formatHomeAmount(targetConverted)} (${homeCountry})`);
                       return `${formatHomeAmount(currentConverted)} of ${formatHomeAmount(targetConverted)}`;
