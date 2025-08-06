@@ -2871,7 +2871,7 @@ function FinancialProfileStep({
               };
               
               // Format currency with proper symbol
-              const formatCurrency = (usdPrice) => {
+              const formatCurrency = (usdPrice: number) => {
                 return `${currentCurrency.symbol}${convertPrice(usdPrice)}`;
               };
               
