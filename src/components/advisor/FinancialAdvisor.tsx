@@ -502,14 +502,7 @@ export function FinancialAdvisor({
           "Consider employer 401(k) matching if available",
           "Review and reduce unnecessary monthly subscriptions",
           "Set up automatic savings to build the habit"
-        ],
-        analysis: {
-          risk_profile: profileData.risk_tolerance,
-          financial_health_score: 75,
-          key_strengths: ["Steady income", "Interest in financial planning"],
-          areas_for_improvement: ["Emergency fund building", "Investment diversification"],
-          next_steps: ["Start automated savings", "Research investment options", "Build emergency fund"]
-        }
+        ]
       });
     } finally {
       setIsLoading(false);
