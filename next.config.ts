@@ -10,21 +10,10 @@ const nextConfig: NextConfig = {
     // Allow TypeScript type checking to continue
     ignoreBuildErrors: false,
   },
-  experimental: {
-    // Enable modern features
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
-  },
   // Optimize for production
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
+  // Remove deprecated and invalid properties
 };
 
 export default nextConfig;
